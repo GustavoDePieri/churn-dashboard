@@ -32,9 +32,10 @@ export default function Home() {
     // Fetch data FAST (without AI)
     async function fetchData() {
       try {
-        const [churnResponse, summaryResponse] = await Promise.all([
+        const [churnResponse, summaryResponse, reactivationsResponse] = await Promise.all([
           fetch('/api/churn-data'),
           fetch('/api/churn-summary'),
+          fetch('/api/reactivations'),
         ]);
 
         if (!churnResponse.ok) {
@@ -42,6 +43,24 @@ export default function Home() {
         }
 
         const churnData = await churnResponse.json();
+        
+        // Merge reactivation data into monthly trend
+        if (reactivationsResponse.ok) {
+          const reactivationData = await reactivationsResponse.json();
+          
+          // Create a map of monthly reactivations
+          const reactivationsByMonth = new Map();
+          reactivationData.monthlyReactivations?.forEach((item: any) => {
+            reactivationsByMonth.set(item.month, item.count);
+          });
+          
+          // Merge reactivations into churn monthly trend
+          churnData.monthlyTrend = churnData.monthlyTrend.map((item: any) => ({
+            ...item,
+            reactivations: reactivationsByMonth.get(item.month) || 0,
+          }));
+        }
+        
         setData(churnData);
         
         if (summaryResponse.ok) {

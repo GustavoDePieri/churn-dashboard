@@ -3,7 +3,60 @@ import {
   ReactivationAnalysis,
   CategoryCount,
 } from '@/types';
-import { format, parseISO, startOfMonth } from 'date-fns';
+import { format, parseISO, startOfMonth, parse } from 'date-fns';
+
+/**
+ * Flexible date parser that handles multiple formats
+ * Supports: YYYY-MM-DD, M/D/YYYY, MM/DD/YYYY, D/M/YYYY, DD/MM/YYYY
+ */
+function parseFlexibleDate(dateString: string): Date {
+  if (!dateString) throw new Error('Empty date string');
+  
+  // Try ISO format first (YYYY-MM-DD)
+  try {
+    const isoDate = parseISO(dateString);
+    if (!isNaN(isoDate.getTime())) {
+      return isoDate;
+    }
+  } catch (e) {
+    // Continue to other formats
+  }
+  
+  // Try M/D/YYYY or MM/DD/YYYY format (US format)
+  if (dateString.includes('/')) {
+    const parts = dateString.split('/');
+    if (parts.length === 3) {
+      const [month, day, year] = parts;
+      // Construct ISO format: YYYY-MM-DD
+      const paddedMonth = month.padStart(2, '0');
+      const paddedDay = day.padStart(2, '0');
+      const isoFormat = `${year}-${paddedMonth}-${paddedDay}`;
+      
+      try {
+        const parsedDate = parseISO(isoFormat);
+        if (!isNaN(parsedDate.getTime())) {
+          return parsedDate;
+        }
+      } catch (e) {
+        // Continue
+      }
+    }
+  }
+  
+  // Try D-M-YYYY or DD-MM-YYYY format (with dashes)
+  if (dateString.includes('-') && !dateString.match(/^\d{4}-/)) {
+    try {
+      const parsedDate = parse(dateString, 'd-M-yyyy', new Date());
+      if (!isNaN(parsedDate.getTime())) {
+        return parsedDate;
+      }
+    } catch (e) {
+      // Continue
+    }
+  }
+  
+  throw new Error(`Unable to parse date: ${dateString}`);
+}
 
 export function analyzeReactivationData(records: ReactivationRecord[]): Omit<ReactivationAnalysis, 'aiInsights'> {
   const totalReactivations = records.length;
@@ -46,7 +99,7 @@ export function analyzeReactivationData(records: ReactivationRecord[]): Omit<Rea
   records.forEach(r => {
     if (r.reactivationDate) {
       try {
-        const month = format(startOfMonth(parseISO(r.reactivationDate)), 'yyyy-MM');
+        const month = format(startOfMonth(parseFlexibleDate(r.reactivationDate)), 'yyyy-MM');
         const existing = monthlyMap.get(month) || { count: 0, mrr: 0 };
         monthlyMap.set(month, {
           count: existing.count + 1,
@@ -54,6 +107,7 @@ export function analyzeReactivationData(records: ReactivationRecord[]): Omit<Rea
         });
       } catch (error) {
         // Skip invalid dates
+        console.warn(`Failed to parse reactivation date: ${r.reactivationDate}`);
       }
     }
   });
