@@ -18,7 +18,7 @@ import MetricCard from '@/components/MetricCard';
 import ChartCard from '@/components/ChartCard';
 import AIInsightsEnhanced from '@/components/AIInsightsEnhanced';
 import LoadingSpinner from '@/components/LoadingSpinner';
-import { darkChartStyles } from '@/lib/chartStyles';
+import { darkChartStyles, brandColors } from '@/lib/chartStyles';
 
 export default function Home() {
   const [data, setData] = useState<ChurnAnalysis | null>(null);
