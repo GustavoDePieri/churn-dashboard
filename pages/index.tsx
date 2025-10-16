@@ -118,15 +118,26 @@ export default function Home() {
                   Monthly churn analysis powered by Google Gemini 2.5 Flash
                 </p>
               </div>
-              <Link 
-                href="/reactivations"
-                className="px-8 py-4 bg-gradient-cta text-white rounded-xl hover:scale-105 transition-all font-bold shadow-xl hover:shadow-pink-main/50 flex items-center space-x-2"
-              >
-                <span>View Reactivations</span>
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                </svg>
-              </Link>
+              <div className="flex gap-3">
+                <Link 
+                  href="/monthly-report"
+                  className="px-8 py-4 bg-gradient-brand text-white rounded-xl hover:scale-105 transition-all font-bold shadow-xl hover:shadow-purple-main/50 flex items-center space-x-2"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
+                  <span>Monthly Report</span>
+                </Link>
+                <Link 
+                  href="/reactivations"
+                  className="px-8 py-4 bg-gradient-cta text-white rounded-xl hover:scale-105 transition-all font-bold shadow-xl hover:shadow-pink-main/50 flex items-center space-x-2"
+                >
+                  <span>Reactivations</span>
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                </Link>
+              </div>
             </div>
           </div>
 
