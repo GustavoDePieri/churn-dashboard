@@ -1,5 +1,5 @@
 import { google } from 'googleapis';
-import { ChurnRecord } from '@/types';
+import { ChurnRecord, ReactivationRecord } from '@/types';
 
 export async function getGoogleSheetsData(): Promise<ChurnRecord[]> {
   try {
@@ -73,6 +73,57 @@ export async function getGoogleSheetsData(): Promise<ChurnRecord[]> {
   } catch (error) {
     console.error('Error fetching Google Sheets data:', error);
     throw new Error('Failed to fetch churn data from Google Sheets');
+  }
+}
+
+export async function getReactivationsData(): Promise<ReactivationRecord[]> {
+  try {
+    const auth = new google.auth.GoogleAuth({
+      credentials: {
+        client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
+        private_key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+      },
+      scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly'],
+    });
+
+    const sheets = google.sheets({ version: 'v4', auth });
+    const spreadsheetId = process.env.GOOGLE_REACTIVATIONS_SHEET_ID;
+    const range = `${process.env.GOOGLE_REACTIVATIONS_TAB}!A:I`;
+
+    const response = await sheets.spreadsheets.values.get({
+      spreadsheetId,
+      range,
+    });
+
+    const rows = response.data.values;
+    if (!rows || rows.length === 0) {
+      return [];
+    }
+
+    // Skip header row and map data
+    // Column mapping for reactivations sheet:
+    // A=Platform Client ID, B=Customer Success Path, C=Account Owner, D=Account Name,
+    // E=MRR, F=Active Contracts, G=Reactivation: ID, H=Reactivation Reason,
+    // I=Reactivation Date
+    const records: ReactivationRecord[] = rows.slice(1).map((row, index) => {
+      return {
+        id: row[6] || `reactivation-${index}`, // Column G - Reactivation: ID
+        platformClientId: row[0] || '', // Column A - Platform Client ID
+        customerSuccessPath: row[1] || 'Unknown', // Column B - Customer Success Path
+        accountOwner: row[2] || 'Unknown', // Column C - Account Owner
+        accountName: row[3] || 'Unknown', // Column D - Account Name
+        mrr: row[4] ? parseFloat(row[4].toString().replace(/[^0-9.-]/g, '')) : 0, // Column E - MRR
+        activeContracts: row[5] ? parseInt(row[5].toString()) : 0, // Column F - Active Contracts
+        reactivationId: row[6] || '', // Column G - Reactivation: ID
+        reactivationReason: row[7] || 'Not specified', // Column H - Reactivation Reason
+        reactivationDate: row[8] || '', // Column I - Reactivation Date
+      };
+    });
+
+    return records;
+  } catch (error) {
+    console.error('Error fetching reactivations data:', error);
+    throw new Error('Failed to fetch reactivations data from Google Sheets');
   }
 }
 

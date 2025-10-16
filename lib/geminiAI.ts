@@ -1,5 +1,5 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { ChurnRecord } from '@/types';
+import { ChurnRecord, ReactivationRecord } from '@/types';
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 
@@ -77,6 +77,47 @@ Format your response with clear sections and bullet points.`;
   } catch (error) {
     console.error('Error generating product feedback insights:', error);
     return 'Unable to generate product feedback insights at this time.';
+  }
+}
+
+export async function generateReactivationInsights(
+  reactivationData: ReactivationRecord[],
+  analysisData: any
+): Promise<string> {
+  try {
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
+
+    const prompt = `You are a business analyst specializing in customer reactivation and retention. Analyze the following reactivation data and provide actionable insights:
+
+Total Reactivations: ${analysisData.totalReactivations}
+Total MRR Recovered: $${analysisData.totalMRRRecovered.toFixed(0)}
+Average MRR per Reactivation: $${analysisData.averageMRR.toFixed(0)}
+
+Top Reactivation Reasons:
+${analysisData.topReactivationReasons.map((r: any) => `- ${r.category}: ${r.count} (${r.percentage.toFixed(1)}%)`).join('\n')}
+
+Reactivations by Customer Success Path:
+${analysisData.reactivationsByCSPath.map((cs: any) => `- ${cs.category}: ${cs.count} (${cs.percentage.toFixed(1)}%)`).join('\n')}
+
+Monthly Reactivation Trend:
+${analysisData.monthlyReactivations.slice(-6).map((m: any) => `- ${m.month}: ${m.count} reactivations, $${m.mrr.toFixed(0)} MRR`).join('\n')}
+
+Please provide:
+1. Key insights about reactivation patterns
+2. Analysis of which factors drive successful reactivations
+3. Customer Success Path effectiveness assessment
+4. Recommendations to improve reactivation rates
+5. Strategies to prevent future churn based on reactivation reasons
+6. Financial impact analysis and projections
+
+Format your response in clear sections with bullet points for easy reading.`;
+
+    const result = await model.generateContent(prompt);
+    const response = result.response;
+    return response.text();
+  } catch (error) {
+    console.error('Error generating reactivation insights:', error);
+    return 'Unable to generate reactivation insights at this time. Please check your API configuration.';
   }
 }
 

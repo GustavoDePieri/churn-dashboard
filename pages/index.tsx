@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Head from 'next/head';
+import Link from 'next/link';
 import {
   BarChart,
   Bar,
@@ -86,12 +87,22 @@ export default function Home() {
         <div className="max-w-7xl mx-auto">
           {/* Header */}
           <div className="mb-8">
-            <h1 className="text-4xl font-bold text-gray-900 mb-2">
-              AI Churn Dashboard
-            </h1>
-            <p className="text-lg text-gray-600">
-              Monthly churn analysis powered by Google Gemini AI
-            </p>
+            <div className="flex justify-between items-center mb-4">
+              <div>
+                <h1 className="text-4xl font-bold text-gray-900 mb-2">
+                  AI Churn Dashboard
+                </h1>
+                <p className="text-lg text-gray-600">
+                  Monthly churn analysis powered by Google Gemini AI
+                </p>
+              </div>
+              <Link 
+                href="/reactivations"
+                className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium shadow-md"
+              >
+                View Reactivations →
+              </Link>
+            </div>
           </div>
 
           {/* Key Metrics */}

@@ -49,3 +49,26 @@ export interface MonthlyTrendData {
   reactivations: number;
 }
 
+export interface ReactivationRecord {
+  id: string;
+  platformClientId: string;
+  customerSuccessPath: string;
+  accountOwner: string;
+  accountName: string;
+  mrr: number;
+  activeContracts: number;
+  reactivationId: string;
+  reactivationReason: string;
+  reactivationDate: string;
+}
+
+export interface ReactivationAnalysis {
+  totalReactivations: number;
+  totalMRRRecovered: number;
+  averageMRR: number;
+  topReactivationReasons: CategoryCount[];
+  reactivationsByCSPath: CategoryCount[];
+  monthlyReactivations: { month: string; count: number; mrr: number }[];
+  aiInsights: string;
+}
+
