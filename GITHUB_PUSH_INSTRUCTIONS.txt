@@ -1,0 +1,53 @@
+================================================
+INSTRUCTIONS TO PUSH TO GITHUB
+================================================
+
+Your project is ready and committed locally! To push to GitHub:
+
+STEP 1: Create a new repository on GitHub
+------------------------------------------
+1. Go to: https://github.com/new
+2. Repository name: churn-dashboard
+3. Description: AI-powered Monthly Churn Dashboard with Google Gemini 2.5
+4. Choose Public or Private
+5. DO NOT initialize with README, .gitignore, or license
+6. Click "Create repository"
+
+STEP 2: Get your GitHub username
+---------------------------------
+Look at the URL after creating the repo. It will be:
+https://github.com/YOUR_USERNAME/churn-dashboard
+
+Note your YOUR_USERNAME value.
+
+STEP 3: Run these commands in PowerShell
+-----------------------------------------
+Replace YOUR_USERNAME with your actual GitHub username:
+
+git remote add origin https://github.com/YOUR_USERNAME/churn-dashboard.git
+git branch -M main
+git push -u origin main
+
+That's it! Your code is now on GitHub.
+
+STEP 4: Deploy to Vercel
+-------------------------
+See DEPLOYMENT_GUIDE.md for complete Vercel deployment instructions.
+
+Quick Vercel steps:
+1. Go to https://vercel.com/new
+2. Import your GitHub repository
+3. Add environment variables (see DEPLOYMENT_GUIDE.md)
+4. Click Deploy
+
+================================================
+Your project includes:
+- ✅ Full Next.js application with TypeScript
+- ✅ Google Sheets API integration
+- ✅ Google Gemini 2.5 AI integration
+- ✅ Beautiful dashboard with charts
+- ✅ All environment variables configured
+- ✅ Git repository initialized with 2 commits
+- ✅ Ready for Vercel deployment
+================================================
+
