@@ -50,20 +50,22 @@ export async function getGoogleSheetsData(): Promise<ChurnRecord[]> {
     // I=Churn Explanation ST, J=Primary Churn Category, K=Warning Reason,
     // L=Account ID, M=Avg MRR, N=Avg TPV, O=Last Effective Payment Date,
     // P=Churn Date, Q=Competitor Name (NEW!), R=Last Invoice Date, S=Owner Area, T=Account Owner
-    // Helper function to parse and validate monetary values
-    const parseMoney = (value: any): number | undefined => {
-      if (!value) return undefined;
-      const parsed = parseFloat(value.toString().replace(/[^0-9.-]/g, ''));
-      if (isNaN(parsed)) return undefined;
-      if (parsed < 0) {
-        console.warn(`⚠️  Negative value detected: ${parsed} for ${row[0]}, converting to 0`);
-        return 0;
-      }
-      return parsed;
-    };
-
     const records: ChurnRecord[] = rows.slice(1).map((row, index) => {
       const churnDate = row[15] || ''; // Column P - Churn Date
+      
+      // Helper function to parse and validate monetary values
+      const parseMoney = (value: any, clientName: string): number | undefined => {
+        if (!value) return undefined;
+        const parsed = parseFloat(value.toString().replace(/[^0-9.-]/g, ''));
+        if (isNaN(parsed)) return undefined;
+        if (parsed < 0) {
+          console.warn(`⚠️  Negative value detected: ${parsed} for ${clientName}, converting to 0`);
+          return 0;
+        }
+        return parsed;
+      };
+      
+      const clientName = row[0] || 'Unknown'; // Column A - Account Name
       
       // Use Avg MRR if Last Invoice MRR is not available
       const mrrValue = row[4] || row[12]; // Column E (Last Invoice MRR) or M (Avg MRR)
@@ -71,13 +73,13 @@ export async function getGoogleSheetsData(): Promise<ChurnRecord[]> {
 
       return {
         id: row[2] || row[11] || `record-${index}`, // Column C (Platform Client ID) or L (Account ID) - prioritize Platform Client ID for matching
-        clientName: row[0] || 'Unknown', // Column A - Account Name
+        clientName,
         churnDate: churnDate,
         churnCategory: row[9] || 'Uncategorized', // Column J - Primary Churn Category
         serviceCategory: row[1] || row[3] || 'Unknown', // Column B (CS Group) or D (Cs Sub-Group)
         competitor: row[16] || undefined, // Column Q - Competitor Name (FIXED: was Column K)
-        mrr: parseMoney(mrrValue),
-        price: parseMoney(tpvValue),
+        mrr: parseMoney(mrrValue, clientName),
+        price: parseMoney(tpvValue, clientName),
         feedback: row[8] || row[7] || undefined, // Column I (Churn Explanation ST) or H (Warning Explanation)
       };
     });

@@ -64,20 +64,16 @@ npm run dev
 
 ## Google Sheets Format
 
-Your Google Sheet should have the following columns (in order):
+See `COLUMN_MAPPING.md` for the complete column structure. Your main churn sheet should include:
+- Account Name, Platform Client ID
+- Churn Date
+- Primary Churn Category
+- Service Categories (CS Group)
+- Competitor Name
+- MRR and pricing data
+- Feedback and explanations
 
-| Column | Description |
-|--------|-------------|
-| A | ID |
-| B | Client Name |
-| C | Churn Date (YYYY-MM-DD) |
-| D | Reactivation Date (YYYY-MM-DD) |
-| E | Churn Category |
-| F | Service Category |
-| G | Competitor |
-| H | MRR |
-| I | Price |
-| J | Feedback |
+**Note**: For accurate reactivation metrics, you also need a separate reactivations sheet.
 
 ## Deployment
 
@@ -105,26 +101,55 @@ npm run build
 
 ```
 churnDashboard/
-├── components/          # React components
-│   ├── MetricCard.tsx
-│   ├── ChartCard.tsx
-│   ├── AIInsights.tsx
-│   └── LoadingSpinner.tsx
-├── lib/                 # Utility functions
-│   ├── googleSheets.ts  # Google Sheets API integration
-│   ├── geminiAI.ts      # Google Gemini AI integration
-│   └── churnAnalytics.ts # Analytics calculations
+├── components/              # React components
+│   ├── MetricCard.tsx      # Metric display cards
+│   ├── ChartCard.tsx       # Chart container
+│   ├── AIInsightsEnhanced.tsx # AI insights display
+│   ├── DateRangeFilter.tsx # Date filtering
+│   └── LoadingSpinner.tsx  # Loading states
+├── lib/                     # Core business logic
+│   ├── googleSheets.ts     # Google Sheets API
+│   ├── geminiAI.ts         # AI integration
+│   ├── churnAnalytics.ts   # Churn calculations
+│   ├── reactivationAnalytics.ts # Reactivation calculations
+│   ├── chartStyles.ts      # Chart styling
+│   └── utils/
+│       └── reactivationCalculator.ts # Single source of truth
 ├── pages/
-│   ├── api/             # API routes
-│   │   ├── churn-data.ts
-│   │   └── product-feedback.ts
-│   ├── _app.tsx
-│   └── index.tsx        # Main dashboard page
+│   ├── api/                 # API routes
+│   │   ├── churn-data.ts   # Main analytics
+│   │   ├── churn-summary.ts # Summary metrics
+│   │   ├── ai-insights.ts  # AI generation
+│   │   ├── monthly-report.ts # Full report
+│   │   ├── reactivations.ts # Reactivation data
+│   │   └── product-feedback.ts # Feedback analysis
+│   ├── index.tsx           # Main dashboard
+│   ├── monthly-report.tsx  # Detailed report page
+│   └── reactivations.tsx   # Reactivations page
 ├── types/
-│   └── index.ts         # TypeScript type definitions
+│   └── index.ts            # TypeScript definitions
 └── styles/
-    └── globals.css      # Global styles
+    └── globals.css         # Global styles
 ```
+
+## Documentation
+
+- **`README.md`** - This file (project overview)
+- **`PROJECT_SUMMARY.md`** - Detailed project summary and features
+- **`SETUP_INSTRUCTIONS.md`** - Step-by-step setup guide
+- **`DEPLOYMENT_GUIDE.md`** - Production deployment instructions
+- **`COLUMN_MAPPING.md`** - Google Sheets column reference
+- **`SECURITY_WARNING.md`** - Important security considerations
+- **`PHASE_1_FIXES_COMPLETE.md`** - Recent bug fixes and improvements
+
+## Recent Improvements
+
+✅ **Phase 1 Critical Fixes (Oct 2025)**:
+- Fixed type mismatches in charts
+- Centralized reactivation calculations (single source of truth)
+- Added environment variable validation
+- Implemented negative value sanitization
+- Fixed competitor column mapping
 
 ## Contributing
 
