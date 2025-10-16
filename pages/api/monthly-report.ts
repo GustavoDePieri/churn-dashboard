@@ -154,7 +154,10 @@ export default async function handler(
       .sort((a, b) => b.count - a.count);
 
     // Generate AI insights
-    const aiInsights = await generateChurnInsights(filteredChurns, churnAnalysis);
+    const aiInsightsResult = await generateChurnInsights(filteredChurns, churnAnalysis);
+    const aiInsights = typeof aiInsightsResult === 'string' 
+      ? aiInsightsResult 
+      : aiInsightsResult.insights || '';
 
     const response: MonthlyReportData = {
       churnAnalysis,
