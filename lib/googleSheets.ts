@@ -88,7 +88,7 @@ export async function getReactivationsData(): Promise<ReactivationRecord[]> {
 
     const sheets = google.sheets({ version: 'v4', auth });
     const spreadsheetId = process.env.GOOGLE_REACTIVATIONS_SHEET_ID;
-    const range = `${process.env.GOOGLE_REACTIVATIONS_TAB}!A:I`;
+    const range = `${process.env.GOOGLE_REACTIVATIONS_TAB}!A:J`; // Extended to column J for Churn Date
 
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId,
@@ -104,7 +104,7 @@ export async function getReactivationsData(): Promise<ReactivationRecord[]> {
     // Column mapping for reactivations sheet (UPDATED):
     // A=Platform Client ID, B=Customer Success Path, C=Account Owner, D=Account Name,
     // E=MRR, F=Active Contracts, G=Reactivation: ID, H=Reactivation Date,
-    // I=Reactivation Reason
+    // I=Reactivation Reason, J=Churn Date
     const records: ReactivationRecord[] = rows.slice(1).map((row, index) => {
       return {
         id: row[6] || `reactivation-${index}`, // Column G - Reactivation: ID
@@ -115,8 +115,9 @@ export async function getReactivationsData(): Promise<ReactivationRecord[]> {
         mrr: row[4] ? parseFloat(row[4].toString().replace(/[^0-9.-]/g, '')) : 0, // Column E - MRR
         activeContracts: row[5] ? parseInt(row[5].toString()) : 0, // Column F - Active Contracts
         reactivationId: row[6] || '', // Column G - Reactivation: ID
-        reactivationReason: row[8] || 'Not specified', // Column I - Reactivation Reason (CHANGED from H to I)
-        reactivationDate: row[7] || '', // Column H - Reactivation Date (CHANGED from I to H)
+        reactivationReason: row[8] || 'Not specified', // Column I - Reactivation Reason
+        reactivationDate: row[7] || '', // Column H - Reactivation Date
+        churnDate: row[9] || undefined, // Column J - Churn Date (NEW!)
       };
     });
 

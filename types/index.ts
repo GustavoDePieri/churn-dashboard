@@ -64,6 +64,7 @@ export interface ReactivationRecord {
   reactivationId: string;
   reactivationReason: string;
   reactivationDate: string;
+  churnDate?: string; // NEW: Churn Date from reactivations sheet
 }
 
 export interface ReactivationAnalysis {

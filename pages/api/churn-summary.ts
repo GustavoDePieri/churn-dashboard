@@ -29,110 +29,50 @@ export default async function handler(
 
     const analysis = analyzeChurnData(churnRecords);
 
-    // Cross-match churns with reactivations for ACCURATE reactivation time
-    // Create maps with multiple keys (name and ID) for better matching
-    const churnByName = new Map<string, any>();
-    const churnById = new Map<string, any>();
-    
-    // Sample IDs for debugging
-    const sampleChurnIds: string[] = [];
-    const sampleChurnNames: string[] = [];
-    
-    churnRecords.forEach((churn, idx) => {
-      // Normalize and clean the keys
-      const nameKey = (churn.clientName || '').toLowerCase().trim().replace(/\s+/g, ' ');
-      const idKey = (churn.id || '').toLowerCase().trim().replace(/\s+/g, '');
-      
-      if (nameKey) churnByName.set(nameKey, churn);
-      if (idKey && idKey !== 'unknown' && !idKey.startsWith('record-')) {
-        churnById.set(idKey, churn);
-        if (idx < 5) sampleChurnIds.push(idKey); // Collect first 5 for debugging
-      }
-      if (idx < 5) sampleChurnNames.push(nameKey);
-    });
-
-    const matchedReactivations: number[] = [];
-    let matchCount = 0;
+    // Calculate average reactivation time directly from reactivations sheet
+    // No matching needed - each reactivation record now has its own churnDate!
+    const reactivationDays: number[] = [];
+    let validReactivations = 0;
     let dateParseErrors = 0;
-    let idMatches = 0;
-    let nameMatches = 0;
     
-    // Sample reactivation IDs for debugging
-    const sampleReactivationIds: string[] = [];
-    const sampleReactivationNames: string[] = [];
-    
-    reactivationRecords.forEach((reactivation, idx) => {
-      // Try matching by Platform Client ID first (more reliable)
-      const idKey = (reactivation.platformClientId || '').toLowerCase().trim().replace(/\s+/g, '');
-      const nameKey = (reactivation.accountName || '').toLowerCase().trim().replace(/\s+/g, ' ');
-      
-      if (idx < 5) {
-        sampleReactivationIds.push(idKey);
-        sampleReactivationNames.push(nameKey);
-      }
-      
-      let churn = null;
-      let matchType = '';
-      
-      if (idKey && idKey !== 'unknown') {
-        churn = churnById.get(idKey);
-        if (churn) {
-          matchType = 'id';
-          idMatches++;
-        }
-      }
-      
-      // If no match by ID, try matching by name
-      if (!churn && nameKey) {
-        churn = churnByName.get(nameKey);
-        if (churn) {
-          matchType = 'name';
-          nameMatches++;
-        }
-      }
-      
-      if (churn && churn.churnDate && reactivation.reactivationDate) {
+    reactivationRecords.forEach(reactivation => {
+      // Both dates are now in the same reactivations sheet
+      if (reactivation.churnDate && reactivation.reactivationDate) {
         try {
-          const churnDate = parseISO(churn.churnDate);
+          const churnDate = parseISO(reactivation.churnDate);
           const reactivationDate = parseISO(reactivation.reactivationDate);
           const days = differenceInDays(reactivationDate, churnDate);
           
           // Only consider reactivations after churn (positive days)
           if (days > 0) {
-            matchedReactivations.push(days);
-            matchCount++;
+            reactivationDays.push(days);
+            validReactivations++;
           }
         } catch (error) {
           dateParseErrors++;
           console.error('Date parse error:', error, {
-            churnDate: churn.churnDate,
-            reactivationDate: reactivation.reactivationDate
+            churnDate: reactivation.churnDate,
+            reactivationDate: reactivation.reactivationDate,
+            accountName: reactivation.accountName
           });
         }
       }
     });
     
-    // Enhanced debug logging
+    // Calculate average
+    const averageReactivationDays = reactivationDays.length > 0
+      ? Math.round(reactivationDays.reduce((sum, days) => sum + days, 0) / reactivationDays.length)
+      : 0;
+    
+    // Debug logging
     console.log('Churn Summary Debug:', {
       totalChurns: churnRecords.length,
       totalReactivations: reactivationRecords.length,
-      matchCount,
-      idMatches,
-      nameMatches,
+      validReactivations,
       dateParseErrors,
-      averageDays: matchedReactivations.length > 0 
-        ? Math.round(matchedReactivations.reduce((sum, days) => sum + days, 0) / matchedReactivations.length)
-        : 0,
-      sampleChurnIds: sampleChurnIds.slice(0, 3),
-      sampleReactivationIds: sampleReactivationIds.slice(0, 3),
-      sampleChurnNames: sampleChurnNames.slice(0, 3),
-      sampleReactivationNames: sampleReactivationNames.slice(0, 3),
+      averageDays: averageReactivationDays,
+      sampleDays: reactivationDays.slice(0, 5), // Show first 5 calculated days
     });
-
-    // Calculate REAL average reactivation time
-    const averageReactivationDays = matchedReactivations.length > 0
-      ? Math.round(matchedReactivations.reduce((sum, days) => sum + days, 0) / matchedReactivations.length)
-      : 0;
 
     const response: ChurnSummary = {
       totalChurns: churnRecords.length,
