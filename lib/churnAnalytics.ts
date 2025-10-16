@@ -175,18 +175,39 @@ export function analyzeChurnData(records: ChurnRecord[]): Omit<ChurnAnalysis, 'a
   // Monthly trend - churns only
   // Reactivations by month calculated in monthly-report API with reactivations data
   const monthlyMap = new Map<string, number>();
-  records.forEach(r => {
+  let parseErrors = 0;
+  let parsedCount = 0;
+  
+  records.forEach((r, idx) => {
     if (r.churnDate) {
       try {
-        const month = format(startOfMonth(parseFlexibleDate(r.churnDate)), 'yyyy-MM');
+        const parsedDate = parseFlexibleDate(r.churnDate);
+        const month = format(startOfMonth(parsedDate), 'yyyy-MM');
         const existing = monthlyMap.get(month) || 0;
         monthlyMap.set(month, existing + 1);
+        parsedCount++;
+        
+        // Log first few for debugging
+        if (idx < 3) {
+          console.log(`📅 Sample churn date: "${r.churnDate}" → ${month} (${parsedDate.toISOString()})`);
+        }
       } catch (error) {
         // Skip invalid dates
-        console.warn(`Failed to parse churn date for monthly trend: ${r.churnDate}`);
+        parseErrors++;
+        if (parseErrors <= 3) {
+          console.warn(`❌ Failed to parse churn date: "${r.churnDate}" - ${error}`);
+        }
       }
     }
   });
+  
+  console.log(`📊 Monthly churn parsing: ${parsedCount} success, ${parseErrors} errors, ${monthlyMap.size} unique months`);
+  
+  // Log top 3 months by count for debugging
+  const topMonths = Array.from(monthlyMap.entries())
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 3);
+  console.log('📊 Top 3 months:', topMonths);
   const monthlyTrend: MonthlyTrendData[] = Array.from(monthlyMap.entries())
     .map(([month, churns]) => ({
       month,
