@@ -13,7 +13,7 @@ export async function getGoogleSheetsData(): Promise<ChurnRecord[]> {
 
     const sheets = google.sheets({ version: 'v4', auth });
     const spreadsheetId = process.env.GOOGLE_SHEETS_ID;
-    const range = `${process.env.GOOGLE_SHEETS_TAB}!A:K`;
+    const range = `${process.env.GOOGLE_SHEETS_TAB}!A:S`;
 
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId,
@@ -26,29 +26,46 @@ export async function getGoogleSheetsData(): Promise<ChurnRecord[]> {
     }
 
     // Skip header row and map data
+    // Column mapping based on your actual Google Sheets structure:
+    // A=Account Name, B=CS Group, C=Platform Client ID, D=Cs Sub-Group,
+    // E=Last Invoice MRR, F=TPV Last Month, G=Warning Metrics, H=Warning Explanation,
+    // I=Churn Explanation ST, J=Primary Churn Category, K=Warning Reason,
+    // L=Account ID, M=Avg MRR, N=Avg TPV, O=Last Effective Payment Date,
+    // P=Churn Date, Q=Last Invoice Date, R=Owner Area, S=Account Owner
     const records: ChurnRecord[] = rows.slice(1).map((row, index) => {
-      const churnDate = row[2] || '';
-      const reactivationDate = row[3] || '';
+      const churnDate = row[15] || ''; // Column P - Churn Date
+      const reactivationDate = row[14] || ''; // Column O - Last Effective Payment Date (could indicate reactivation)
       
       let reactivationDays: number | undefined;
       if (churnDate && reactivationDate) {
-        const churnTime = new Date(churnDate).getTime();
-        const reactivationTime = new Date(reactivationDate).getTime();
-        reactivationDays = Math.floor((reactivationTime - churnTime) / (1000 * 60 * 60 * 24));
+        try {
+          const churnTime = new Date(churnDate).getTime();
+          const reactivationTime = new Date(reactivationDate).getTime();
+          // Only calculate if reactivation is AFTER churn
+          if (reactivationTime > churnTime) {
+            reactivationDays = Math.floor((reactivationTime - churnTime) / (1000 * 60 * 60 * 24));
+          }
+        } catch (error) {
+          // Skip invalid dates
+        }
       }
 
+      // Use Avg MRR if Last Invoice MRR is not available
+      const mrrValue = row[4] || row[12]; // Column E (Last Invoice MRR) or M (Avg MRR)
+      const tpvValue = row[5] || row[13]; // Column F (TPV Last Month) or N (Avg TPV)
+
       return {
-        id: row[0] || `record-${index}`,
-        clientName: row[1] || 'Unknown',
+        id: row[11] || row[2] || `record-${index}`, // Column L (Account ID) or C (Platform Client ID)
+        clientName: row[0] || 'Unknown', // Column A - Account Name
         churnDate: churnDate,
         reactivationDate: reactivationDate || undefined,
         reactivationDays,
-        churnCategory: row[4] || 'Uncategorized',
-        serviceCategory: row[5] || 'Unknown',
-        competitor: row[6] || undefined,
-        mrr: row[7] ? parseFloat(row[7]) : undefined,
-        price: row[8] ? parseFloat(row[8]) : undefined,
-        feedback: row[9] || undefined,
+        churnCategory: row[9] || 'Uncategorized', // Column J - Primary Churn Category
+        serviceCategory: row[1] || row[3] || 'Unknown', // Column B (CS Group) or D (Cs Sub-Group)
+        competitor: row[10] || undefined, // Column K - Warning Reason (might contain competitor info)
+        mrr: mrrValue ? parseFloat(mrrValue.toString().replace(/[^0-9.-]/g, '')) : undefined,
+        price: tpvValue ? parseFloat(tpvValue.toString().replace(/[^0-9.-]/g, '')) : undefined,
+        feedback: row[8] || row[7] || undefined, // Column I (Churn Explanation ST) or H (Warning Explanation)
       };
     });
 
