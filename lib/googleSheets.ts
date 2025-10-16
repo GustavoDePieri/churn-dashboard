@@ -8,11 +8,13 @@ if (typeof window === 'undefined') {
     'GOOGLE_PRIVATE_KEY',
     'GOOGLE_SHEETS_ID',
     'GOOGLE_SHEETS_TAB',
+    'GOOGLE_REACTIVATIONS_SHEET_ID',
+    'GOOGLE_REACTIVATIONS_TAB',
   ];
 
   requiredEnvVars.forEach(envVar => {
     if (!process.env[envVar]) {
-      throw new Error(`${envVar} is not configured. Check your .env.local file.`);
+      throw new Error(`${envVar} is not configured. Check your .env.local file. See REACTIVATIONS_ENV_SETUP.md for details.`);
     }
   });
   
