@@ -13,7 +13,7 @@ export async function getGoogleSheetsData(): Promise<ChurnRecord[]> {
 
     const sheets = google.sheets({ version: 'v4', auth });
     const spreadsheetId = process.env.GOOGLE_SHEETS_ID;
-    const range = `${process.env.GOOGLE_SHEETS_TAB}!A:S`;
+    const range = `${process.env.GOOGLE_SHEETS_TAB}!A:T`; // Extended to column T for new structure
 
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId,
@@ -26,12 +26,12 @@ export async function getGoogleSheetsData(): Promise<ChurnRecord[]> {
     }
 
     // Skip header row and map data
-    // Column mapping based on your actual Google Sheets structure:
+    // UPDATED Column mapping (October 2025):
     // A=Account Name, B=CS Group, C=Platform Client ID, D=Cs Sub-Group,
     // E=Last Invoice MRR, F=TPV Last Month, G=Warning Metrics, H=Warning Explanation,
     // I=Churn Explanation ST, J=Primary Churn Category, K=Warning Reason,
     // L=Account ID, M=Avg MRR, N=Avg TPV, O=Last Effective Payment Date,
-    // P=Churn Date, Q=Last Invoice Date, R=Owner Area, S=Account Owner
+    // P=Churn Date, Q=Competitor Name (NEW!), R=Last Invoice Date, S=Owner Area, T=Account Owner
     const records: ChurnRecord[] = rows.slice(1).map((row, index) => {
       const churnDate = row[15] || ''; // Column P - Churn Date
       const reactivationDate = row[14] || ''; // Column O - Last Effective Payment Date (could indicate reactivation)
@@ -62,7 +62,7 @@ export async function getGoogleSheetsData(): Promise<ChurnRecord[]> {
         reactivationDays,
         churnCategory: row[9] || 'Uncategorized', // Column J - Primary Churn Category
         serviceCategory: row[1] || row[3] || 'Unknown', // Column B (CS Group) or D (Cs Sub-Group)
-        competitor: row[10] || undefined, // Column K - Warning Reason (might contain competitor info)
+        competitor: row[16] || undefined, // Column Q - Competitor Name (FIXED: was Column K)
         mrr: mrrValue ? parseFloat(mrrValue.toString().replace(/[^0-9.-]/g, '')) : undefined,
         price: tpvValue ? parseFloat(tpvValue.toString().replace(/[^0-9.-]/g, '')) : undefined,
         feedback: row[8] || row[7] || undefined, // Column I (Churn Explanation ST) or H (Warning Explanation)

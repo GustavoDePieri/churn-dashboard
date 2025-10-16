@@ -18,15 +18,16 @@ This document shows how your Google Sheets columns are mapped to the dashboard d
 | 8 | **H** | Warning Explanation | `feedback` (fallback) | Used if Churn Explanation ST is empty |
 | 9 | **I** | Churn Explanation ST | `feedback` (primary) | Main feedback for AI analysis |
 | 10 | **J** | Primary Churn Category | `churnCategory` | **Main churn reason** |
-| 11 | **K** | Warning Reason | `competitor` | May contain competitor info |
+| 11 | **K** | Warning Reason | - | Not currently used |
 | 12 | **L** | Account ID | `id` (primary) | Primary unique identifier |
 | 13 | **M** | Avg MRR | `mrr` (fallback) | Used if Last Invoice MRR is empty |
 | 14 | **N** | Avg TPV | `price` (fallback) | Used if TPV Last Month is empty |
 | 15 | **O** | Last Effective Payment Date | `reactivationDate` | Potential reactivation indicator |
 | 16 | **P** | Churn Date | `churnDate` | **Date of churn (critical)** |
-| 17 | **Q** | Last Invoice Date | - | Not currently used |
-| 18 | **R** | Owner Area | - | Not currently used |
-| 19 | **S** | Account Owner | - | Not currently used |
+| 17 | **Q** | **Competitor Name** | `competitor` | **Actual competitor name (NEW!)** |
+| 18 | **R** | Last Invoice Date | - | Not currently used |
+| 19 | **S** | Owner Area | - | Not currently used |
+| 20 | **T** | Account Owner | - | Not currently used |
 
 ## Key Mappings
 
@@ -40,7 +41,7 @@ This document shows how your Google Sheets columns are mapped to the dashboard d
   reactivationDate: Last Effective Payment Date (O),
   churnCategory: Primary Churn Category (J),
   serviceCategory: CS Group (B) or Cs Sub-Group (D),
-  competitor: Warning Reason (K),
+  competitor: Competitor Name (Q), ✅ UPDATED!
   mrr: Last Invoice MRR (E) or Avg MRR (M),
   price: TPV Last Month (F) or Avg TPV (N),
   feedback: Churn Explanation ST (I) or Warning Explanation (H)
@@ -79,7 +80,7 @@ This document shows how your Google Sheets columns are mapped to the dashboard d
 - Tracks churns vs reactivations over time
 
 ### Competitor Analysis Table
-- Uses: **Column K (Warning Reason)**
+- Uses: **Column Q (Competitor Name)** ✅ UPDATED!
 - Identifies which competitors are winning
 - Combines with **Column E/M (MRR)** and **Column F/N (TPV)** for financial impact
 
