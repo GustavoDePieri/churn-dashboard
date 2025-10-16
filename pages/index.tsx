@@ -22,6 +22,7 @@ import { darkChartStyles } from '@/lib/chartStyles';
 
 export default function Home() {
   const [data, setData] = useState<ChurnAnalysis | null>(null);
+  const [summary, setSummary] = useState<any>(null);
   const [aiInsights, setAiInsights] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [aiLoading, setAiLoading] = useState(true);
@@ -31,7 +32,10 @@ export default function Home() {
     // Fetch data FAST (without AI)
     async function fetchData() {
       try {
-        const churnResponse = await fetch('/api/churn-data');
+        const [churnResponse, summaryResponse] = await Promise.all([
+          fetch('/api/churn-data'),
+          fetch('/api/churn-summary'),
+        ]);
 
         if (!churnResponse.ok) {
           throw new Error('Failed to fetch churn data');
@@ -39,6 +43,12 @@ export default function Home() {
 
         const churnData = await churnResponse.json();
         setData(churnData);
+        
+        if (summaryResponse.ok) {
+          const summaryData = await summaryResponse.json();
+          setSummary(summaryData);
+        }
+        
         setLoading(false);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');
@@ -129,7 +139,7 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <MetricCard
               title="Total Churns"
-              value={data.totalChurns}
+              value={summary?.totalChurns || data.totalChurns}
               subtitle="Customers lost"
               icon={
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -139,8 +149,8 @@ export default function Home() {
             />
             <MetricCard
               title="Avg Reactivation Time"
-              value={`${Math.round(data.averageReactivationDays)} days`}
-              subtitle="Time for clients to return"
+              value={summary ? `${summary.averageReactivationDays} days` : `${Math.round(data.averageReactivationDays)} days`}
+              subtitle="Churn to reactivation date"
               icon={
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -149,8 +159,8 @@ export default function Home() {
             />
             <MetricCard
               title="Top Churn Reason"
-              value={data.topChurnCategories[0]?.category.substring(0, 20) || 'N/A'}
-              subtitle={`${data.topChurnCategories[0]?.count || 0} churns`}
+              value={(summary?.topChurnCategory || data.topChurnCategories[0]?.category || 'N/A').substring(0, 20)}
+              subtitle={`${summary?.topChurnCategoryCount || data.topChurnCategories[0]?.count || 0} churns`}
               icon={
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -159,8 +169,8 @@ export default function Home() {
             />
             <MetricCard
               title="Top Competitor"
-              value={data.competitorAnalysis[0]?.competitor.substring(0, 20) || 'N/A'}
-              subtitle={`$${(data.competitorAnalysis[0]?.totalMRR || 0).toFixed(0)} MRR lost`}
+              value={(summary?.topCompetitor || data.competitorAnalysis[0]?.competitor || 'N/A').substring(0, 20)}
+              subtitle={`$${(summary?.topCompetitorMRR || data.competitorAnalysis[0]?.totalMRR || 0).toFixed(0)} MRR lost`}
               icon={
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
