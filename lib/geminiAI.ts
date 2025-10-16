@@ -6,42 +6,73 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 export async function generateChurnInsights(
   churnData: ChurnRecord[],
   analysisData: any
-): Promise<string> {
+): Promise<{ insights: string; executiveSummary: string }> {
   try {
     const model = genAI.getGenerativeModel({ model: 'models/gemini-2.5-flash' });
 
-    const prompt = `You are a business analyst specializing in customer churn analysis. Analyze the following churn data and provide actionable insights:
+    // Executive Summary Prompt
+    const summaryPrompt = `You are a business analyst. Create a concise 3-sentence executive summary of this churn data:
 
 Total Churns: ${analysisData.totalChurns}
-Average Reactivation Time: ${analysisData.averageReactivationDays.toFixed(1)} days
+Total MRR Lost: $${analysisData.totalMRRLost.toFixed(0)}
+Top 3 Churn Reasons: ${analysisData.topChurnCategories.slice(0, 3).map((c: any) => `${c.category} (${c.percentage.toFixed(1)}%)`).join(', ')}
+Reactivation Rate: ${analysisData.reactivationByChurnCategory.length > 0 ? analysisData.reactivationByChurnCategory[0].reactivationRate.toFixed(1) : 0}%
 
-Top Churn Categories:
-${analysisData.topChurnCategories.map((c: any) => `- ${c.category}: ${c.count} (${c.percentage.toFixed(1)}%)`).join('\n')}
+Format: 3 short, impactful sentences highlighting the most critical points.`;
 
-Top Service Categories:
-${analysisData.topServiceCategories.map((c: any) => `- ${c.category}: ${c.count} (${c.percentage.toFixed(1)}%)`).join('\n')}
+    const summaryResult = await model.generateContent(summaryPrompt);
+    const executiveSummary = summaryResult.response.text();
 
-Competitor Analysis:
-${analysisData.competitorAnalysis.map((c: any) => `- ${c.competitor}: ${c.count} churns, $${c.totalMRR.toFixed(0)} total MRR, $${c.averagePrice.toFixed(0)} avg price`).join('\n')}
+    // Detailed Insights Prompt
+    const detailedPrompt = `You are a business analyst. Analyze this churn data using Problem → Impact → Recommendation format:
 
-Reactivation Correlation:
-${analysisData.reactivationByChurnCategory.map((r: any) => `- ${r.churnCategory}: ${r.reactivationRate.toFixed(1)}% reactivation rate, ${r.averageDaysToReactivation.toFixed(0)} days avg`).join('\n')}
+METRICS:
+- Total Churns: ${analysisData.totalChurns}
+- Total MRR Lost: $${analysisData.totalMRRLost.toFixed(0)}
+- Avg MRR per Churn: $${analysisData.averageMRRPerChurn.toFixed(0)}
+- Avg Reactivation Time: ${analysisData.averageReactivationDays.toFixed(1)} days
 
-Please provide:
-1. Key insights about churn patterns
-2. Analysis of which churn categories are most likely to return
-3. Competitor threat assessment
-4. Recommendations to reduce churn
-5. Strategies to improve reactivation rates
+CHURN CATEGORIES:
+${analysisData.topChurnCategories.map((c: any) => `- ${c.category}: ${c.count} churns (${c.percentage.toFixed(1)}%) - $${(c.count * analysisData.averageMRRPerChurn).toFixed(0)} MRR impact`).join('\n')}
 
-Format your response in clear sections with bullet points for easy reading.`;
+CLIENT FEEDBACK THEMES:
+${analysisData.clientFeedbackCategories?.map((c: any) => `- ${c.category}: ${c.count} mentions (${c.percentage.toFixed(1)}%)`).join('\n') || 'No feedback data'}
 
-    const result = await model.generateContent(prompt);
-    const response = result.response;
-    return response.text();
+COMPETITOR IMPACT:
+${analysisData.competitorAnalysis.map((c: any) => `- ${c.competitor}: ${c.count} churns, $${c.totalMRR.toFixed(0)} MRR lost`).join('\n')}
+
+REACTIVATION INSIGHTS:
+${analysisData.reactivationByChurnCategory.slice(0, 5).map((r: any) => `- ${r.churnCategory}: ${r.reactivationRate.toFixed(1)}% return rate, ${r.averageDaysToReactivation.toFixed(0)} days avg`).join('\n')}
+
+Provide analysis in this exact format:
+
+## 🔴 CRITICAL ISSUES (Highest Priority)
+For each top issue:
+**Problem:** [issue name] - [% of churns]
+**Impact:** $[MRR lost] monthly revenue impact
+**Recommendation:** [specific action item]
+
+## 🟡 SECONDARY CONCERNS
+Brief bullet points with quick fixes
+
+## 🟢 OPPORTUNITIES
+Reactivation strategies and preventive measures
+
+## 📊 PRODUCT FEEDBACK INTEGRATION
+Key themes to share with product team for dashboard sync
+
+Keep each section concise and action-oriented.`;
+
+    const detailedResult = await model.generateContent(detailedPrompt);
+    const insights = detailedResult.response.text();
+
+    return { insights, executiveSummary };
   } catch (error) {
     console.error('Error generating AI insights:', error);
-    return 'Unable to generate AI insights at this time. Please check your API configuration.';
+    return {
+      insights: 'Unable to generate AI insights at this time. Please check your API configuration.',
+      executiveSummary: 'Analysis unavailable.',
+    };
   }
 }
 

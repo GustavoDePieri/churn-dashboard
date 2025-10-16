@@ -8,7 +8,7 @@ import {
 } from '@/types';
 import { format, parseISO, startOfMonth } from 'date-fns';
 
-export function analyzeChurnData(records: ChurnRecord[]): Omit<ChurnAnalysis, 'aiInsights'> {
+export function analyzeChurnData(records: ChurnRecord[]): Omit<ChurnAnalysis, 'aiInsights' | 'executiveSummary'> {
   const totalChurns = records.length;
 
   // Calculate average reactivation days
@@ -16,6 +16,10 @@ export function analyzeChurnData(records: ChurnRecord[]): Omit<ChurnAnalysis, 'a
   const averageReactivationDays = reactivatedRecords.length > 0
     ? reactivatedRecords.reduce((sum, r) => sum + (r.reactivationDays || 0), 0) / reactivatedRecords.length
     : 0;
+
+  // Calculate MRR lost
+  const totalMRRLost = records.reduce((sum, r) => sum + (r.mrr || 0), 0);
+  const averageMRRPerChurn = totalChurns > 0 ? totalMRRLost / totalChurns : 0;
 
   // Top churn categories
   const churnCategoryMap = new Map<string, number>();
@@ -46,6 +50,46 @@ export function analyzeChurnData(records: ChurnRecord[]): Omit<ChurnAnalysis, 'a
     }))
     .sort((a, b) => b.count - a.count)
     .slice(0, 10);
+
+  // Client feedback categories (extract keywords/themes from feedback)
+  const feedbackCategoryMap = new Map<string, number>();
+  records.forEach(r => {
+    if (r.feedback) {
+      const feedback = r.feedback.toLowerCase();
+      // Extract common themes
+      const themes = [
+        { keyword: ['payment', 'billing', 'invoice', 'charge'], category: 'Payment/Billing Issues' },
+        { keyword: ['communication', 'response', 'support', 'contact'], category: 'Communication Problems' },
+        { keyword: ['fee', 'price', 'cost', 'expensive'], category: 'Pricing Concerns' },
+        { keyword: ['reliability', 'downtime', 'error', 'bug', 'issue'], category: 'Reliability/Technical Issues' },
+        { keyword: ['feature', 'functionality', 'missing', 'need'], category: 'Feature Gaps' },
+        { keyword: ['competitor', 'alternative', 'switched'], category: 'Competitor' },
+        { keyword: ['slow', 'late', 'delay'], category: 'Speed/Performance' },
+        { keyword: ['contractor', 'worker', 'employee'], category: 'Contractor Management' },
+      ];
+
+      let matched = false;
+      for (const theme of themes) {
+        if (theme.keyword.some(kw => feedback.includes(kw))) {
+          const count = feedbackCategoryMap.get(theme.category) || 0;
+          feedbackCategoryMap.set(theme.category, count + 1);
+          matched = true;
+          break;
+        }
+      }
+      if (!matched && r.feedback) {
+        const count = feedbackCategoryMap.get('Other Feedback') || 0;
+        feedbackCategoryMap.set('Other Feedback', count + 1);
+      }
+    }
+  });
+  const clientFeedbackCategories: CategoryCount[] = Array.from(feedbackCategoryMap.entries())
+    .map(([category, count]) => ({
+      category,
+      count,
+      percentage: (count / records.filter(r => r.feedback).length) * 100,
+    }))
+    .sort((a, b) => b.count - a.count);
 
   // Competitor analysis
   const competitorMap = new Map<string, { count: number; totalMRR: number; totalPrice: number }>();
@@ -114,8 +158,11 @@ export function analyzeChurnData(records: ChurnRecord[]): Omit<ChurnAnalysis, 'a
   return {
     totalChurns,
     averageReactivationDays,
+    totalMRRLost,
+    averageMRRPerChurn,
     topChurnCategories,
     topServiceCategories,
+    clientFeedbackCategories,
     competitorAnalysis,
     reactivationByChurnCategory,
     monthlyTrend,

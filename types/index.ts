@@ -15,12 +15,16 @@ export interface ChurnRecord {
 export interface ChurnAnalysis {
   totalChurns: number;
   averageReactivationDays: number;
+  totalMRRLost: number;
+  averageMRRPerChurn: number;
   topChurnCategories: CategoryCount[];
   topServiceCategories: CategoryCount[];
+  clientFeedbackCategories: CategoryCount[];
   competitorAnalysis: CompetitorData[];
   reactivationByChurnCategory: ReactivationCorrelation[];
   monthlyTrend: MonthlyTrendData[];
   aiInsights: string;
+  executiveSummary: string;
 }
 
 export interface CategoryCount {

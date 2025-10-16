@@ -105,15 +105,40 @@ export default function Home() {
             </div>
           </div>
 
+          {/* Executive Summary */}
+          {data.executiveSummary && (
+            <div className="mb-8 bg-gradient-to-r from-blue-50 to-indigo-50 border-l-4 border-blue-600 p-6 rounded-r-lg shadow-sm">
+              <h2 className="text-xl font-bold text-gray-900 mb-3 flex items-center">
+                <svg className="w-6 h-6 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Executive Summary
+              </h2>
+              <p className="text-gray-800 text-lg leading-relaxed whitespace-pre-wrap">{data.executiveSummary}</p>
+            </div>
+          )}
+
           {/* Key Metrics */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
             <MetricCard
               title="Total Churns"
               value={data.totalChurns}
               subtitle="Total customers churned"
+              trend="down"
               icon={
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+              }
+            />
+            <MetricCard
+              title="Total MRR Lost"
+              value={`$${data.totalMRRLost.toFixed(0)}`}
+              subtitle={`Avg $${data.averageMRRPerChurn.toFixed(0)} per churn`}
+              trend="down"
+              icon={
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               }
             />
@@ -154,6 +179,32 @@ export default function Home() {
           <div className="mb-8">
             <AIInsights insights={data.aiInsights} />
           </div>
+
+          {/* Client Feedback Categories - Prominent Display */}
+          {data.clientFeedbackCategories && data.clientFeedbackCategories.length > 0 && (
+            <div className="mb-8">
+              <ChartCard
+                title="🗣️ Client-Reported Feedback Categories"
+                description={`Analysis of ${data.clientFeedbackCategories.reduce((sum, c) => sum + c.count, 0)} feedback entries - Key themes from customer voices`}
+              >
+                <ResponsiveContainer width="100%" height={350}>
+                  <BarChart data={data.clientFeedbackCategories}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="category" angle={-45} textAnchor="end" height={120} fontSize={12} />
+                    <YAxis label={{ value: 'Number of Mentions', angle: -90, position: 'insideLeft' }} />
+                    <Tooltip />
+                    <Legend />
+                    <Bar dataKey="count" fill="#f59e0b" name="Feedback Mentions" />
+                  </BarChart>
+                </ResponsiveContainer>
+                <div className="mt-4 p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded">
+                  <p className="text-sm text-yellow-900">
+                    <strong>📊 Product Feedback Integration:</strong> These insights have been automatically synced for cross-analysis with the Product Feedback Dashboard.
+                  </p>
+                </div>
+              </ChartCard>
+            </div>
+          )}
 
           {/* Charts Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">

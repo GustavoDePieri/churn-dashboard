@@ -23,12 +23,13 @@ export default async function handler(
     // Perform analytics
     const analysisData = analyzeChurnData(churnRecords);
 
-    // Generate AI insights
-    const aiInsights = await generateChurnInsights(churnRecords, analysisData);
+    // Generate AI insights (both detailed and executive summary)
+    const { insights, executiveSummary } = await generateChurnInsights(churnRecords, analysisData);
 
     const response: ChurnAnalysis = {
       ...analysisData,
-      aiInsights,
+      aiInsights: insights,
+      executiveSummary,
     };
 
     res.status(200).json(response);
