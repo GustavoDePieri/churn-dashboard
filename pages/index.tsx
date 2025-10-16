@@ -179,25 +179,44 @@ export default function Home() {
             />
           </div>
 
-          {/* Boss Question 1: Main Churn Categories */}
+          {/* Boss Question 1: Main Churn Categories by Month */}
           <div className="mb-8">
             <ChartCard
-              title="❌ Main Churn Categories"
-              description="Why are customers leaving?"
+              title="❌ Monthly Churn Categories"
+              description="Why are customers leaving each month?"
             >
-              <ResponsiveContainer width="100%" height={350}>
-                <BarChart data={data.topChurnCategories.slice(0, 6)}>
+              <ResponsiveContainer width="100%" height={400}>
+                <BarChart data={data.monthlyChurnByCategory}>
                   <CartesianGrid {...darkChartStyles.cartesianGrid} />
-                  <XAxis dataKey="category" angle={-45} textAnchor="end" height={120} {...darkChartStyles.axis} />
-                  <YAxis {...darkChartStyles.axis} />
-                  <Tooltip {...darkChartStyles.tooltip} />
-                  <Bar dataKey="count" fill="url(#churnGradient)" />
-                  <defs>
-                    <linearGradient id="churnGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#f43f5e" stopOpacity={0.9}/>
-                      <stop offset="100%" stopColor="#ec4899" stopOpacity={0.7}/>
-                    </linearGradient>
-                  </defs>
+                  <XAxis 
+                    dataKey="month" 
+                    {...darkChartStyles.axis}
+                    tickFormatter={(value) => {
+                      const date = new Date(value + '-01');
+                      return date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
+                    }}
+                  />
+                  <YAxis {...darkChartStyles.axis} label={{ value: 'Churns', angle: -90, position: 'insideLeft', style: {fill: '#ffffff'} }} />
+                  <Tooltip 
+                    {...darkChartStyles.tooltip}
+                    labelFormatter={(value) => {
+                      const date = new Date(value + '-01');
+                      return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+                    }}
+                  />
+                  <Legend {...darkChartStyles.legend} />
+                  {data.topChurnCategories.slice(0, 5).map((cat, index) => (
+                    <Bar 
+                      key={cat.category} 
+                      dataKey={cat.category} 
+                      stackId="churn" 
+                      fill={brandColors[index % brandColors.length]}
+                      name={cat.category.length > 25 ? cat.category.substring(0, 22) + '...' : cat.category}
+                    />
+                  ))}
+                  {data.monthlyChurnByCategory.some((m: any) => m.Other) && (
+                    <Bar dataKey="Other" stackId="churn" fill="#6b7280" name="Other" />
+                  )}
                 </BarChart>
               </ResponsiveContainer>
             </ChartCard>

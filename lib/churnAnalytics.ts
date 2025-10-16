@@ -155,6 +155,45 @@ export function analyzeChurnData(records: ChurnRecord[]): Omit<ChurnAnalysis, 'a
     }))
     .sort((a, b) => a.month.localeCompare(b.month));
 
+  // Monthly churn by category (for stacked bar chart)
+  const monthlyCategoryMap = new Map<string, Map<string, number>>();
+  records.forEach(r => {
+    if (r.churnDate) {
+      try {
+        const month = format(startOfMonth(parseISO(r.churnDate)), 'yyyy-MM');
+        if (!monthlyCategoryMap.has(month)) {
+          monthlyCategoryMap.set(month, new Map());
+        }
+        const categoryMap = monthlyCategoryMap.get(month)!;
+        const count = categoryMap.get(r.churnCategory) || 0;
+        categoryMap.set(r.churnCategory, count + 1);
+      } catch (error) {
+        // Skip invalid dates
+      }
+    }
+  });
+
+  // Get top 5 categories for the chart
+  const topCategories = topChurnCategories.slice(0, 5).map(c => c.category);
+  
+  // Build monthly data with category breakdown
+  const monthlyChurnByCategory = Array.from(monthlyCategoryMap.entries())
+    .map(([month, categoryMap]) => {
+      const monthData: any = { month };
+      topCategories.forEach(category => {
+        monthData[category] = categoryMap.get(category) || 0;
+      });
+      // Add "Other" category for remaining churns
+      const otherCount = Array.from(categoryMap.entries())
+        .filter(([cat]) => !topCategories.includes(cat))
+        .reduce((sum, [, count]) => sum + count, 0);
+      if (otherCount > 0) {
+        monthData['Other'] = otherCount;
+      }
+      return monthData;
+    })
+    .sort((a, b) => a.month.localeCompare(b.month));
+
   return {
     totalChurns,
     averageReactivationDays,
@@ -166,6 +205,7 @@ export function analyzeChurnData(records: ChurnRecord[]): Omit<ChurnAnalysis, 'a
     competitorAnalysis,
     reactivationByChurnCategory,
     monthlyTrend,
+    monthlyChurnByCategory,
   };
 }
 

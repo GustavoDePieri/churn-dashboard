@@ -23,6 +23,7 @@ export interface ChurnAnalysis {
   competitorAnalysis: CompetitorData[];
   reactivationByChurnCategory: ReactivationCorrelation[];
   monthlyTrend: MonthlyTrendData[];
+  monthlyChurnByCategory: any[]; // Array of objects with month and category counts
   aiInsights: string;
   executiveSummary: string;
 }
