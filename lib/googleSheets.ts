@@ -46,14 +46,14 @@ export async function getGoogleSheetsData(): Promise<ChurnRecord[]> {
     }
 
     // Skip header row and map data
-    // UPDATED Column mapping (October 2025):
+    // UPDATED Column mapping (October 2025 - Latest):
     // A=Account Name, B=CS Group, C=Platform Client ID, D=Cs Sub-Group,
     // E=Last Invoice MRR, F=TPV Last Month, G=Warning Metrics, H=Warning Explanation,
     // I=Churn Explanation ST, J=Primary Churn Category, K=Warning Reason,
     // L=Account ID, M=Avg MRR, N=Avg TPV, O=Last Effective Payment Date,
-    // P=Churn Date, Q=Competitor Name (NEW!), R=Last Invoice Date, S=Owner Area, T=Account Owner
+    // P=Competitor Name, Q=Last Invoice Date, R=Owner Area, S=Account Owner, T=Estimated Churn Date
     const records: ChurnRecord[] = rows.slice(1).map((row, index) => {
-      const churnDate = row[15] || ''; // Column P - Churn Date
+      const churnDate = row[19] || ''; // Column T - Estimated Churn Date (UPDATED!)
       
       // Helper function to parse and validate monetary values
       const parseMoney = (value: any, clientName: string): number | undefined => {
@@ -79,7 +79,7 @@ export async function getGoogleSheetsData(): Promise<ChurnRecord[]> {
         churnDate: churnDate,
         churnCategory: row[9] || 'Uncategorized', // Column J - Primary Churn Category
         serviceCategory: row[1] || row[3] || 'Unknown', // Column B (CS Group) or D (Cs Sub-Group)
-        competitor: row[16] || undefined, // Column Q - Competitor Name (FIXED: was Column K)
+        competitor: row[15] || undefined, // Column P - Competitor Name (UPDATED: moved from Q!)
         mrr: parseMoney(mrrValue, clientName),
         price: parseMoney(tpvValue, clientName),
         feedback: row[8] || row[7] || undefined, // Column I (Churn Explanation ST) or H (Warning Explanation)

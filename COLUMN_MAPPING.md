@@ -4,7 +4,7 @@
 
 This document shows how your Google Sheets columns are mapped to the dashboard data model.
 
-### Complete Column List (A-S)
+### Complete Column List (A-T) - UPDATED October 2025
 
 | Column | Letter | Field Name | Maps To | Usage |
 |--------|--------|------------|---------|-------|
@@ -22,12 +22,12 @@ This document shows how your Google Sheets columns are mapped to the dashboard d
 | 12 | **L** | Account ID | `id` (primary) | Primary unique identifier |
 | 13 | **M** | Avg MRR | `mrr` (fallback) | Used if Last Invoice MRR is empty |
 | 14 | **N** | Avg TPV | `price` (fallback) | Used if TPV Last Month is empty |
-| 15 | **O** | Last Effective Payment Date | `reactivationDate` | Potential reactivation indicator |
-| 16 | **P** | Churn Date | `churnDate` | **Date of churn (critical)** |
-| 17 | **Q** | **Competitor Name** | `competitor` | **Actual competitor name (NEW!)** |
-| 18 | **R** | Last Invoice Date | - | Not currently used |
-| 19 | **S** | Owner Area | - | Not currently used |
-| 20 | **T** | Account Owner | - | Not currently used |
+| 15 | **O** | Last Effective Payment Date | - | Not currently used |
+| 16 | **P** | **Competitor Name** | `competitor` | **Actual competitor name (MOVED!)** |
+| 17 | **Q** | Last Invoice Date | - | Not currently used |
+| 18 | **R** | Owner Area | - | Not currently used |
+| 19 | **S** | Account Owner | - | Not currently used |
+| 20 | **T** | **Estimated Churn Date** | `churnDate` | **Date of churn (MOVED!)** |
 
 ## Key Mappings
 
@@ -37,11 +37,10 @@ This document shows how your Google Sheets columns are mapped to the dashboard d
 {
   id: Account ID (L) or Platform Client ID (C),
   clientName: Account Name (A),
-  churnDate: Churn Date (P),
-  reactivationDate: Last Effective Payment Date (O),
+  churnDate: Estimated Churn Date (T), ✅ UPDATED!
   churnCategory: Primary Churn Category (J),
   serviceCategory: CS Group (B) or Cs Sub-Group (D),
-  competitor: Competitor Name (Q), ✅ UPDATED!
+  competitor: Competitor Name (P), ✅ UPDATED!
   mrr: Last Invoice MRR (E) or Avg MRR (M),
   price: TPV Last Month (F) or Avg TPV (N),
   feedback: Churn Explanation ST (I) or Warning Explanation (H)
@@ -51,7 +50,7 @@ This document shows how your Google Sheets columns are mapped to the dashboard d
 ## Critical Columns for Analysis
 
 ### Must Have Data:
-1. **Column P (Churn Date)** - Required for time-based analysis
+1. **Column T (Estimated Churn Date)** - Required for time-based analysis ✅ UPDATED!
 2. **Column J (Primary Churn Category)** - Main reason for churn
 3. **Column A (Account Name)** - Client identification
 
@@ -59,11 +58,11 @@ This document shows how your Google Sheets columns are mapped to the dashboard d
 4. **Column E or M (MRR)** - Financial impact analysis
 5. **Column I (Churn Explanation ST)** - AI insights generation
 6. **Column B (CS Group)** - Service category grouping
+7. **Column P (Competitor Name)** - Competitor analysis ✅ UPDATED!
 
 ### Nice to Have:
-7. **Column O (Last Effective Payment Date)** - Reactivation tracking
-8. **Column K (Warning Reason)** - Competitor analysis
-9. **Column F or N (TPV)** - Additional financial metrics
+8. **Column F or N (TPV)** - Additional financial metrics
+9. **Column Q (Last Invoice Date)** - Payment history
 
 ## Dashboard Features by Column
 
