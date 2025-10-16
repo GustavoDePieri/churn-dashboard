@@ -1,11 +1,11 @@
 # AI Churn Dashboard
 
-A powerful AI-powered monthly churn report dashboard built with Next.js, Google Gemini 2.5 AI, and Google Sheets integration.
+A powerful AI-powered monthly churn report dashboard built with Next.js, Google Gemini 1.5 AI, and Google Sheets integration.
 
 ## Features
 
 - 📊 **Real-time Churn Analytics**: Fetch and analyze churn data from Google Sheets
-- 🤖 **AI-Powered Insights**: Google Gemini 2.5 generates actionable insights from your churn data
+- 🤖 **AI-Powered Insights**: Google Gemini 1.5 Flash generates actionable insights from your churn data
 - 📈 **Interactive Visualizations**: Beautiful charts showing:
   - Top churn categories
   - Service category distribution
@@ -20,7 +20,7 @@ A powerful AI-powered monthly churn report dashboard built with Next.js, Google 
 - **Framework**: Next.js 14 with TypeScript
 - **Styling**: Tailwind CSS
 - **Charts**: Recharts
-- **AI**: Google Gemini 2.5 API
+- **AI**: Google Gemini 1.5 API
 - **Data Source**: Google Sheets API
 - **Deployment**: Vercel
 

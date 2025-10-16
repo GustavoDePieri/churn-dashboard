@@ -8,12 +8,12 @@ Your AI-powered churn dashboard is ready for deployment!
 
 ### Core Features
 1. **📊 Real-time Data Integration**
-   - Connects to Google Sheets (ID: `1HTlc5fgzdfR_b0DSUNseI1iZkGdhljU_AgjkNzztz0A`)
-   - Tab: `All-history-churns`
+   - Connects to Google Sheets via API
+   - Configurable sheet ID and tab name
    - Automatic data fetching and parsing
 
 2. **🤖 AI-Powered Analysis**
-   - Google Gemini 2.5 integration
+   - Google Gemini 1.5 Flash integration
    - Generates actionable insights from churn data
    - Analyzes product feedback
    - Identifies patterns and trends
@@ -44,7 +44,7 @@ Your AI-powered churn dashboard is ready for deployment!
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS
 - **Charts**: Recharts
-- **AI**: Google Gemini 2.5 API
+- **AI**: Google Gemini 1.5 API
 - **Data Source**: Google Sheets API
 - **Date Handling**: date-fns
 - **Deployment**: Vercel-ready
@@ -201,7 +201,7 @@ Your Google Sheet should have these columns:
 ✅ Correlation between churn category and reactivation
 ✅ Competitor analysis with pricing and MRR
 ✅ Product feedback dashboard with AI insights
-✅ Google Gemini 2.5 API integration
+✅ Google Gemini 1.5 API integration
 ✅ Google Sheets data integration
 ✅ Modern, responsive UI
 ✅ Ready for Vercel deployment

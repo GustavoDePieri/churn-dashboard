@@ -8,7 +8,7 @@ export async function generateChurnInsights(
   analysisData: any
 ): Promise<string> {
   try {
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
     const prompt = `You are a business analyst specializing in customer churn analysis. Analyze the following churn data and provide actionable insights:
 
@@ -49,7 +49,7 @@ export async function generateProductFeedbackInsights(
   churnData: ChurnRecord[]
 ): Promise<string> {
   try {
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
     const feedbackRecords = churnData.filter(record => record.feedback);
     
