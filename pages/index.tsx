@@ -21,8 +21,9 @@ import MetricCard from '@/components/MetricCard';
 import ChartCard from '@/components/ChartCard';
 import AIInsightsEnhanced from '@/components/AIInsightsEnhanced';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import { darkChartStyles, brandColors } from '@/lib/chartStyles';
 
-const COLORS = ['#8b5cf6', '#ec4899', '#fb7185', '#f43f5e', '#fbbf24', '#34d399', '#60a5fa', '#c084fc'];
+const COLORS = brandColors;
 
 export default function Home() {
   const [data, setData] = useState<ChurnAnalysis | null>(null);
@@ -262,11 +263,17 @@ export default function Home() {
             >
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={data.topChurnCategories.slice(0, 8)}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="category" angle={-45} textAnchor="end" height={100} fontSize={12} />
-                  <YAxis />
-                  <Tooltip />
-                  <Bar dataKey="count" fill="#0ea5e9" />
+                  <CartesianGrid {...darkChartStyles.cartesianGrid} />
+                  <XAxis dataKey="category" angle={-45} textAnchor="end" height={100} {...darkChartStyles.axis} />
+                  <YAxis {...darkChartStyles.axis} />
+                  <Tooltip {...darkChartStyles.tooltip} />
+                  <Bar dataKey="count" fill="url(#churnGradient)" />
+                  <defs>
+                    <linearGradient id="churnGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#ec4899" stopOpacity={0.9}/>
+                      <stop offset="100%" stopColor="#f43f5e" stopOpacity={0.7}/>
+                    </linearGradient>
+                  </defs>
                 </BarChart>
               </ResponsiveContainer>
             </ChartCard>
@@ -286,13 +293,14 @@ export default function Home() {
                     cy="50%"
                     outerRadius={100}
                     label={(entry) => `${entry.category} (${entry.percentage.toFixed(0)}%)`}
-                    labelLine={false}
+                    labelLine={{stroke: '#ffffff'}}
+                    style={{fill: '#ffffff'}}
                   >
                     {data.topServiceCategories.slice(0, 8).map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip />
+                  <Tooltip {...darkChartStyles.tooltip} />
                 </PieChart>
               </ResponsiveContainer>
             </ChartCard>
@@ -304,13 +312,13 @@ export default function Home() {
             >
               <ResponsiveContainer width="100%" height={300}>
                 <LineChart data={data.monthlyTrend}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="month" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Line type="monotone" dataKey="churns" stroke="#ef4444" strokeWidth={2} name="Churns" />
-                  <Line type="monotone" dataKey="reactivations" stroke="#10b981" strokeWidth={2} name="Reactivations" />
+                  <CartesianGrid {...darkChartStyles.cartesianGrid} />
+                  <XAxis dataKey="month" {...darkChartStyles.axis} />
+                  <YAxis {...darkChartStyles.axis} />
+                  <Tooltip {...darkChartStyles.tooltip} />
+                  <Legend {...darkChartStyles.legend} />
+                  <Line type="monotone" dataKey="churns" stroke="#f43f5e" strokeWidth={3} name="Churns" dot={{fill: '#f43f5e', r: 4}} />
+                  <Line type="monotone" dataKey="reactivations" stroke="#34d399" strokeWidth={3} name="Reactivations" dot={{fill: '#34d399', r: 4}} />
                 </LineChart>
               </ResponsiveContainer>
             </ChartCard>
@@ -322,11 +330,17 @@ export default function Home() {
             >
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={data.reactivationByChurnCategory.slice(0, 8)}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="churnCategory" angle={-45} textAnchor="end" height={100} fontSize={12} />
-                  <YAxis label={{ value: 'Reactivation Rate (%)', angle: -90, position: 'insideLeft' }} />
-                  <Tooltip />
-                  <Bar dataKey="reactivationRate" fill="#10b981" />
+                  <CartesianGrid {...darkChartStyles.cartesianGrid} />
+                  <XAxis dataKey="churnCategory" angle={-45} textAnchor="end" height={100} {...darkChartStyles.axis} />
+                  <YAxis label={{ value: 'Reactivation Rate (%)', angle: -90, position: 'insideLeft', style: {fill: '#ffffff'} }} {...darkChartStyles.axis} />
+                  <Tooltip {...darkChartStyles.tooltip} />
+                  <Bar dataKey="reactivationRate" fill="url(#reactivationGradient)" />
+                  <defs>
+                    <linearGradient id="reactivationGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#34d399" stopOpacity={0.9}/>
+                      <stop offset="100%" stopColor="#10b981" stopOpacity={0.7}/>
+                    </linearGradient>
+                  </defs>
                 </BarChart>
               </ResponsiveContainer>
             </ChartCard>
@@ -340,36 +354,36 @@ export default function Home() {
                 description="Competitors winning customers and associated MRR/pricing"
               >
                 <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <table className="min-w-full">
+                    <thead>
+                      <tr className="border-b border-white/10">
+                        <th className="px-6 py-4 text-left text-xs font-bold text-white/80 uppercase tracking-wider">
                           Competitor
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="px-6 py-4 text-left text-xs font-bold text-white/80 uppercase tracking-wider">
                           Churns Won
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="px-6 py-4 text-left text-xs font-bold text-white/80 uppercase tracking-wider">
                           Total MRR Lost
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="px-6 py-4 text-left text-xs font-bold text-white/80 uppercase tracking-wider">
                           Avg Price
                         </th>
                       </tr>
                     </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
+                    <tbody>
                       {data.competitorAnalysis.map((competitor, index) => (
-                        <tr key={index} className="hover:bg-gray-50">
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                        <tr key={index} className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-white">
                             {competitor.competitor}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-coral-main font-medium">
                             {competitor.count}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-white/70">
                             ${competitor.totalMRR.toFixed(2)}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-white/70">
                             ${competitor.averagePrice.toFixed(2)}
                           </td>
                         </tr>
@@ -385,11 +399,11 @@ export default function Home() {
           {productFeedback && productFeedback.feedbackCount > 0 && (
             <div className="mb-8">
               <ChartCard
-                title="Product Feedback Insights"
+                title="📝 Product Feedback Insights"
                 description={`Analysis of ${productFeedback.feedbackCount} feedback entries from churned customers`}
               >
-                <div className="prose prose-sm max-w-none">
-                  <div className="text-gray-700 whitespace-pre-wrap leading-relaxed">
+                <div className="prose prose-invert prose-sm max-w-none">
+                  <div className="text-white/80 whitespace-pre-wrap leading-relaxed">
                     {productFeedback.insights}
                   </div>
                 </div>
@@ -398,9 +412,12 @@ export default function Home() {
           )}
 
           {/* Footer */}
-          <footer className="mt-12 text-center text-sm text-gray-500">
-            <p>Powered by Google Gemini AI | Data from Google Sheets</p>
-            <p className="mt-1">Last updated: {new Date().toLocaleString()}</p>
+          <footer className="mt-16 text-center text-sm text-white/40 border-t border-white/10 pt-8">
+            <p className="flex items-center justify-center space-x-2 mb-2">
+              <span className="w-2 h-2 bg-gradient-brand rounded-full animate-pulse"></span>
+              <span>Powered by Google Gemini 2.5 Flash | Data from Google Sheets</span>
+            </p>
+            <p className="text-xs text-white/30">Last updated: {new Date().toLocaleString()}</p>
           </footer>
         </div>
       </main>
