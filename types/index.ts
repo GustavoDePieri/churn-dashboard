@@ -3,13 +3,13 @@ export interface ChurnRecord {
   clientName: string;
   churnDate: string;
   churnCategory: string;
-  reactivationDate?: string;
-  reactivationDays?: number;
   competitor?: string;
   mrr?: number;
   price?: number;
   serviceCategory?: string;
   feedback?: string;
+  // NOTE: reactivationDate and reactivationDays removed
+  // Use dedicated reactivations sheet as source of truth
 }
 
 export interface ChurnAnalysis {

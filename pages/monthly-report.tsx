@@ -379,8 +379,8 @@ export default function MonthlyReport() {
                   <YAxis {...darkChartStyles.axis} />
                   <Tooltip {...darkChartStyles.tooltip} />
                   <Legend {...darkChartStyles.legend} />
-                  <Bar dataKey="totalChurns" fill="#f43f5e" name="Total Churns" />
-                  <Bar dataKey="reactivations" fill="#34d399" name="Reactivations" />
+                  <Bar dataKey="totalCount" fill="#f43f5e" name="Total Churns" />
+                  <Bar dataKey="reactivationRate" fill="#34d399" name="Reactivation Rate (%)" />
                 </BarChart>
               </ResponsiveContainer>
             </ChartCard>

@@ -1,6 +1,16 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { ChurnRecord, ReactivationRecord } from '@/types';
 
+// Validate environment on module load (server-side only)
+if (typeof window === 'undefined') {
+  if (!process.env.GEMINI_API_KEY) {
+    throw new Error('GEMINI_API_KEY is not configured. Check your .env.local file.');
+  }
+  if (!process.env.GEMINI_API_KEY.startsWith('AIza')) {
+    console.warn('⚠️  GEMINI_API_KEY may be invalid (should start with "AIza")');
+  }
+}
+
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 
 export async function generateChurnInsights(

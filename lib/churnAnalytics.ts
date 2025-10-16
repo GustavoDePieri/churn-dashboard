@@ -11,11 +11,9 @@ import { format, parseISO, startOfMonth } from 'date-fns';
 export function analyzeChurnData(records: ChurnRecord[]): Omit<ChurnAnalysis, 'aiInsights' | 'executiveSummary'> {
   const totalChurns = records.length;
 
-  // Calculate average reactivation days
-  const reactivatedRecords = records.filter(r => r.reactivationDays !== undefined);
-  const averageReactivationDays = reactivatedRecords.length > 0
-    ? reactivatedRecords.reduce((sum, r) => sum + (r.reactivationDays || 0), 0) / reactivatedRecords.length
-    : 0;
+  // NOTE: Average reactivation days now calculated from reactivations sheet
+  // via calculateReactivationMetrics utility (single source of truth)
+  const averageReactivationDays = 0; // Placeholder - calculated elsewhere
 
   // Calculate MRR lost
   const totalMRRLost = records.reduce((sum, r) => sum + (r.mrr || 0), 0);
@@ -83,11 +81,14 @@ export function analyzeChurnData(records: ChurnRecord[]): Omit<ChurnAnalysis, 'a
       }
     }
   });
+  
+  // Calculate feedback count once to avoid division by zero
+  const feedbackRecordsCount = records.filter(r => r.feedback).length;
   const clientFeedbackCategories: CategoryCount[] = Array.from(feedbackCategoryMap.entries())
     .map(([category, count]) => ({
       category,
       count,
-      percentage: (count / records.filter(r => r.feedback).length) * 100,
+      percentage: feedbackRecordsCount > 0 ? (count / feedbackRecordsCount) * 100 : 0,
     }))
     .sort((a, b) => b.count - a.count);
 
@@ -113,45 +114,30 @@ export function analyzeChurnData(records: ChurnRecord[]): Omit<ChurnAnalysis, 'a
     .sort((a, b) => b.count - a.count);
 
   // Reactivation by churn category
-  const reactivationMap = new Map<string, { total: number; reactivated: number; totalDays: number }>();
-  records.forEach(r => {
-    const existing = reactivationMap.get(r.churnCategory) || { total: 0, reactivated: 0, totalDays: 0 };
-    reactivationMap.set(r.churnCategory, {
-      total: existing.total + 1,
-      reactivated: existing.reactivated + (r.reactivationDate ? 1 : 0),
-      totalDays: existing.totalDays + (r.reactivationDays || 0),
-    });
-  });
-  const reactivationByChurnCategory: ReactivationCorrelation[] = Array.from(reactivationMap.entries())
-    .map(([churnCategory, data]) => ({
-      churnCategory,
-      reactivationRate: (data.reactivated / data.total) * 100,
-      averageDaysToReactivation: data.reactivated > 0 ? data.totalDays / data.reactivated : 0,
-      totalCount: data.total,
-    }))
-    .sort((a, b) => b.reactivationRate - a.reactivationRate);
+  // NOTE: This calculation now happens in monthly-report API where we have access
+  // to both churn and reactivation datasets to properly match them
+  // Returning empty array here as placeholder
+  const reactivationByChurnCategory: ReactivationCorrelation[] = [];
 
-  // Monthly trend
-  const monthlyMap = new Map<string, { churns: number; reactivations: number }>();
+  // Monthly trend - churns only
+  // Reactivations by month calculated in monthly-report API with reactivations data
+  const monthlyMap = new Map<string, number>();
   records.forEach(r => {
     if (r.churnDate) {
       try {
         const month = format(startOfMonth(parseISO(r.churnDate)), 'yyyy-MM');
-        const existing = monthlyMap.get(month) || { churns: 0, reactivations: 0 };
-        monthlyMap.set(month, {
-          churns: existing.churns + 1,
-          reactivations: existing.reactivations + (r.reactivationDate ? 1 : 0),
-        });
+        const existing = monthlyMap.get(month) || 0;
+        monthlyMap.set(month, existing + 1);
       } catch (error) {
         // Skip invalid dates
       }
     }
   });
   const monthlyTrend: MonthlyTrendData[] = Array.from(monthlyMap.entries())
-    .map(([month, data]) => ({
+    .map(([month, churns]) => ({
       month,
-      churns: data.churns,
-      reactivations: data.reactivations,
+      churns,
+      reactivations: 0, // Calculated in monthly-report API
     }))
     .sort((a, b) => a.month.localeCompare(b.month));
 
