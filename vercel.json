@@ -1,0 +1,15 @@
+{
+  "buildCommand": "npm run build",
+  "devCommand": "npm run dev",
+  "installCommand": "npm install",
+  "framework": "nextjs",
+  "regions": ["iad1"],
+  "env": {
+    "GEMINI_API_KEY": "@gemini_api_key",
+    "GOOGLE_SHEETS_ID": "@google_sheets_id",
+    "GOOGLE_SHEETS_TAB": "@google_sheets_tab",
+    "GOOGLE_SERVICE_ACCOUNT_EMAIL": "@google_service_account_email",
+    "GOOGLE_PRIVATE_KEY": "@google_private_key"
+  }
+}
+
