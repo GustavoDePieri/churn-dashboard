@@ -55,7 +55,7 @@ export async function getGoogleSheetsData(): Promise<ChurnRecord[]> {
       const tpvValue = row[5] || row[13]; // Column F (TPV Last Month) or N (Avg TPV)
 
       return {
-        id: row[11] || row[2] || `record-${index}`, // Column L (Account ID) or C (Platform Client ID)
+        id: row[2] || row[11] || `record-${index}`, // Column C (Platform Client ID) or L (Account ID) - prioritize Platform Client ID for matching
         clientName: row[0] || 'Unknown', // Column A - Account Name
         churnDate: churnDate,
         reactivationDate: reactivationDate || undefined,

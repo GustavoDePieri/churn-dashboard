@@ -30,18 +30,32 @@ export default async function handler(
     const analysis = analyzeChurnData(churnRecords);
 
     // Cross-match churns with reactivations for ACCURATE reactivation time
-    const churnMap = new Map<string, any>();
+    // Create maps with multiple keys (name and ID) for better matching
+    const churnByName = new Map<string, any>();
+    const churnById = new Map<string, any>();
+    
     churnRecords.forEach(churn => {
-      const key = (churn.clientName || '').toLowerCase().trim();
-      if (key) {
-        churnMap.set(key, churn);
-      }
+      const nameKey = (churn.clientName || '').toLowerCase().trim();
+      const idKey = (churn.id || '').toLowerCase().trim();
+      
+      if (nameKey) churnByName.set(nameKey, churn);
+      if (idKey) churnById.set(idKey, churn);
     });
 
     const matchedReactivations: number[] = [];
+    let matchCount = 0;
+    let dateParseErrors = 0;
+    
     reactivationRecords.forEach(reactivation => {
-      const key = (reactivation.accountName || '').toLowerCase().trim();
-      const churn = churnMap.get(key);
+      // Try matching by name first
+      const nameKey = (reactivation.accountName || '').toLowerCase().trim();
+      let churn = churnByName.get(nameKey);
+      
+      // If no match by name, try matching by Platform Client ID
+      if (!churn) {
+        const idKey = (reactivation.platformClientId || '').toLowerCase().trim();
+        churn = churnById.get(idKey);
+      }
       
       if (churn && churn.churnDate && reactivation.reactivationDate) {
         try {
@@ -52,11 +66,27 @@ export default async function handler(
           // Only consider reactivations after churn (positive days)
           if (days > 0) {
             matchedReactivations.push(days);
+            matchCount++;
           }
         } catch (error) {
-          // Skip invalid dates
+          dateParseErrors++;
+          console.error('Date parse error:', error, {
+            churnDate: churn.churnDate,
+            reactivationDate: reactivation.reactivationDate
+          });
         }
       }
+    });
+    
+    // Debug logging
+    console.log('Churn Summary Debug:', {
+      totalChurns: churnRecords.length,
+      totalReactivations: reactivationRecords.length,
+      matchCount,
+      dateParseErrors,
+      averageDays: matchedReactivations.length > 0 
+        ? Math.round(matchedReactivations.reduce((sum, days) => sum + days, 0) / matchedReactivations.length)
+        : 0
     });
 
     // Calculate REAL average reactivation time
