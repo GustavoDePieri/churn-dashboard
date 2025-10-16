@@ -8,30 +8,28 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        primary: {
-          50: '#f0f9ff',
-          100: '#e0f2fe',
-          200: '#bae6fd',
-          300: '#7dd3fc',
-          400: '#38bdf8',
-          500: '#0ea5e9',
-          600: '#0284c7',
-          700: '#0369a1',
-          800: '#075985',
-          900: '#0c4a6e',
+        navy: {
+          main: '#1a0d2e',
+          dark: '#0f0819',
+          light: '#2a1b3d',
         },
-        danger: {
-          50: '#fef2f2',
-          100: '#fee2e2',
-          200: '#fecaca',
-          300: '#fca5a5',
-          400: '#f87171',
-          500: '#ef4444',
-          600: '#dc2626',
-          700: '#b91c1c',
-          800: '#991b1b',
-          900: '#7f1d1d',
+        purple: {
+          main: '#8b5cf6',
+          dark: '#7c3aed',
+          deep: '#6d28d9',
         },
+        pink: {
+          main: '#ec4899',
+        },
+        coral: {
+          main: '#f43f5e',
+          dark: '#e11d48',
+        },
+      },
+      backgroundImage: {
+        'gradient-brand': 'linear-gradient(120deg, #8b5cf6 0%, #ec4899 50%, #fb7185 100%)',
+        'gradient-cta': 'linear-gradient(90deg, #f43f5e 0%, #ec4899 100%)',
+        'gradient-background': 'linear-gradient(135deg, #0f0819 0%, #1a0d2e 50%, #2a1b3d 100%)',
       },
     },
   },

@@ -10,25 +10,25 @@ interface MetricCardProps {
 
 export default function MetricCard({ title, value, subtitle, icon, trend }: MetricCardProps) {
   const trendColors = {
-    up: 'text-green-600',
-    down: 'text-red-600',
-    neutral: 'text-gray-600',
+    up: 'text-green-400',
+    down: 'text-coral-main',
+    neutral: 'text-white/60',
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200 hover:shadow-lg transition-shadow">
+    <div className="glass rounded-xl p-6 hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-purple-main/20 group">
       <div className="flex items-start justify-between">
         <div className="flex-1">
-          <p className="text-sm font-medium text-gray-600 mb-2">{title}</p>
-          <p className="text-3xl font-bold text-gray-900">{value}</p>
+          <p className="text-sm font-medium text-white/60 mb-2 group-hover:text-white/80 transition-colors">{title}</p>
+          <p className="text-3xl font-bold text-white mb-1 gradient-text">{value}</p>
           {subtitle && (
-            <p className={`text-sm mt-2 ${trend ? trendColors[trend] : 'text-gray-500'}`}>
+            <p className={`text-sm mt-2 ${trend ? trendColors[trend] : 'text-white/60'}`}>
               {subtitle}
             </p>
           )}
         </div>
         {icon && (
-          <div className="ml-4 p-3 bg-primary-50 rounded-lg text-primary-600">
+          <div className="ml-4 p-3 bg-gradient-brand rounded-lg text-white shadow-lg group-hover:scale-110 transition-transform">
             {icon}
           </div>
         )}

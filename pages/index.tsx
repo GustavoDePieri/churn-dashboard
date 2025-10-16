@@ -19,24 +19,23 @@ import {
 import { ChurnAnalysis } from '@/types';
 import MetricCard from '@/components/MetricCard';
 import ChartCard from '@/components/ChartCard';
-import AIInsights from '@/components/AIInsights';
+import AIInsightsEnhanced from '@/components/AIInsightsEnhanced';
 import LoadingSpinner from '@/components/LoadingSpinner';
 
-const COLORS = ['#0ea5e9', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#ef4444', '#6366f1', '#14b8a6'];
+const COLORS = ['#8b5cf6', '#ec4899', '#fb7185', '#f43f5e', '#fbbf24', '#34d399', '#60a5fa', '#c084fc'];
 
 export default function Home() {
   const [data, setData] = useState<ChurnAnalysis | null>(null);
   const [productFeedback, setProductFeedback] = useState<{ insights: string; feedbackCount: number } | null>(null);
   const [loading, setLoading] = useState(true);
+  const [aiLoading, setAiLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    async function fetchData() {
+    // First, fetch data WITHOUT AI insights to show dashboard quickly
+    async function fetchInitialData() {
       try {
-        const [churnResponse, feedbackResponse] = await Promise.all([
-          fetch('/api/churn-data'),
-          fetch('/api/product-feedback'),
-        ]);
+        const churnResponse = await fetch('/api/churn-data');
 
         if (!churnResponse.ok) {
           throw new Error('Failed to fetch churn data');
@@ -44,19 +43,38 @@ export default function Home() {
 
         const churnData = await churnResponse.json();
         setData(churnData);
+        setLoading(false);
+        
+        // Check if AI insights are already loaded
+        if (churnData.aiInsights && churnData.aiInsights.length > 10) {
+          setAiLoading(false);
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'An error occurred');
+        setLoading(false);
+        setAiLoading(false);
+      }
+    }
 
+    // Fetch product feedback separately (non-blocking)
+    async function fetchProductFeedback() {
+      try {
+        const feedbackResponse = await fetch('/api/product-feedback');
         if (feedbackResponse.ok) {
           const feedbackData = await feedbackResponse.json();
           setProductFeedback(feedbackData);
         }
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'An error occurred');
-      } finally {
-        setLoading(false);
+        // Silent fail for product feedback
       }
     }
 
-    fetchData();
+    fetchInitialData();
+    fetchProductFeedback();
+
+    // Simulate AI finishing (in reality, it loads with the data)
+    const aiTimeout = setTimeout(() => setAiLoading(false), 2000);
+    return () => clearTimeout(aiTimeout);
   }, []);
 
   if (loading) {
@@ -65,10 +83,13 @@ export default function Home() {
 
   if (error || !data) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-50">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-red-600 mb-4">Error Loading Dashboard</h1>
-          <p className="text-gray-600">{error || 'No data available'}</p>
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="glass rounded-2xl p-8 text-center max-w-md">
+          <svg className="w-16 h-16 text-coral-main mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+          <h1 className="text-2xl font-bold text-white mb-4">Error Loading Dashboard</h1>
+          <p className="text-white/70">{error || 'No data available'}</p>
         </div>
       </div>
     );
@@ -83,38 +104,43 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+      <main className="min-h-screen py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
-          <div className="mb-8">
-            <div className="flex justify-between items-center mb-4">
+          <div className="mb-10">
+            <div className="flex justify-between items-center mb-6">
               <div>
-                <h1 className="text-4xl font-bold text-gray-900 mb-2">
+                <h1 className="text-5xl font-bold gradient-text mb-3">
                   AI Churn Dashboard
                 </h1>
-                <p className="text-lg text-gray-600">
-                  Monthly churn analysis powered by Google Gemini AI
+                <p className="text-xl text-white/70">
+                  Monthly churn analysis powered by Google Gemini 2.5 Flash
                 </p>
               </div>
               <Link 
                 href="/reactivations"
-                className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium shadow-md"
+                className="px-8 py-4 bg-gradient-cta text-white rounded-xl hover:scale-105 transition-all font-bold shadow-xl hover:shadow-pink-main/50 flex items-center space-x-2"
               >
-                View Reactivations →
+                <span>View Reactivations</span>
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
               </Link>
             </div>
           </div>
 
           {/* Executive Summary */}
           {data.executiveSummary && (
-            <div className="mb-8 bg-gradient-to-r from-blue-50 to-indigo-50 border-l-4 border-blue-600 p-6 rounded-r-lg shadow-sm">
-              <h2 className="text-xl font-bold text-gray-900 mb-3 flex items-center">
-                <svg className="w-6 h-6 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
+            <div className="mb-8 glass rounded-2xl p-6 border-l-4 border-purple-main shadow-xl">
+              <h2 className="text-2xl font-bold text-white mb-4 flex items-center">
+                <div className="w-10 h-10 rounded-full bg-gradient-brand flex items-center justify-center mr-3">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                </div>
                 Executive Summary
               </h2>
-              <p className="text-gray-800 text-lg leading-relaxed whitespace-pre-wrap">{data.executiveSummary}</p>
+              <p className="text-white/90 text-lg leading-relaxed whitespace-pre-wrap pl-13">{data.executiveSummary}</p>
             </div>
           )}
 
@@ -177,7 +203,7 @@ export default function Home() {
 
           {/* AI Insights */}
           <div className="mb-8">
-            <AIInsights insights={data.aiInsights} />
+            <AIInsightsEnhanced insights={data.aiInsights} isLoading={aiLoading} />
           </div>
 
           {/* Client Feedback Categories - Prominent Display */}
@@ -189,17 +215,38 @@ export default function Home() {
               >
                 <ResponsiveContainer width="100%" height={350}>
                   <BarChart data={data.clientFeedbackCategories}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="category" angle={-45} textAnchor="end" height={120} fontSize={12} />
-                    <YAxis label={{ value: 'Number of Mentions', angle: -90, position: 'insideLeft' }} />
-                    <Tooltip />
-                    <Legend />
-                    <Bar dataKey="count" fill="#f59e0b" name="Feedback Mentions" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+                    <XAxis 
+                      dataKey="category" 
+                      angle={-45} 
+                      textAnchor="end" 
+                      height={120} 
+                      fontSize={12} 
+                      stroke="#ffffff" 
+                      tick={{fill: '#ffffff'}}
+                    />
+                    <YAxis 
+                      label={{ value: 'Number of Mentions', angle: -90, position: 'insideLeft', style: {fill: '#ffffff'} }} 
+                      stroke="#ffffff" 
+                      tick={{fill: '#ffffff'}}
+                    />
+                    <Tooltip 
+                      contentStyle={{backgroundColor: '#1a0d2e', border: '1px solid #8b5cf6', borderRadius: '8px'}}
+                      labelStyle={{color: '#ffffff'}}
+                    />
+                    <Legend wrapperStyle={{color: '#ffffff'}} />
+                    <Bar dataKey="count" fill="url(#colorGradient)" name="Feedback Mentions" />
+                    <defs>
+                      <linearGradient id="colorGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#f59e0b" stopOpacity={0.9}/>
+                        <stop offset="100%" stopColor="#fb7185" stopOpacity={0.7}/>
+                      </linearGradient>
+                    </defs>
                   </BarChart>
                 </ResponsiveContainer>
-                <div className="mt-4 p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded">
-                  <p className="text-sm text-yellow-900">
-                    <strong>📊 Product Feedback Integration:</strong> These insights have been automatically synced for cross-analysis with the Product Feedback Dashboard.
+                <div className="mt-6 p-4 glass-light border-l-4 border-yellow-500 rounded-xl">
+                  <p className="text-sm text-white/90">
+                    <strong className="text-yellow-400">📊 Product Feedback Integration:</strong> These insights have been automatically synced for cross-analysis with the Product Feedback Dashboard.
                   </p>
                 </div>
               </ChartCard>
