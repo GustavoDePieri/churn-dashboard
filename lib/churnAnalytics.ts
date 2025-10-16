@@ -188,8 +188,13 @@ export function analyzeChurnData(records: ChurnRecord[]): Omit<ChurnAnalysis, 'a
         parsedCount++;
         
         // Log first few for debugging
-        if (idx < 3) {
-          console.log(`📅 Sample churn date: "${r.churnDate}" → ${month} (${parsedDate.toISOString()})`);
+        if (idx < 5) {
+          console.log(`📅 Sample ${idx + 1}: "${r.churnDate}" → ${month} | Client: ${r.clientName}`);
+        }
+        
+        // Special logging for Dec 2024 to debug the 545 issue
+        if (month === '2024-12' && existing < 5) {
+          console.log(`  ⭐ Dec 2024 #${existing + 1}: "${r.churnDate}" | ${r.clientName}`);
         }
       } catch (error) {
         // Skip invalid dates
@@ -202,12 +207,18 @@ export function analyzeChurnData(records: ChurnRecord[]): Omit<ChurnAnalysis, 'a
   });
   
   console.log(`📊 Monthly churn parsing: ${parsedCount} success, ${parseErrors} errors, ${monthlyMap.size} unique months`);
+  console.log(`📊 Total records processed: ${records.length}`);
   
-  // Log top 3 months by count for debugging
+  // Log top 5 months by count for debugging
   const topMonths = Array.from(monthlyMap.entries())
     .sort((a, b) => b[1] - a[1])
-    .slice(0, 3);
-  console.log('📊 Top 3 months:', topMonths);
+    .slice(0, 5);
+  console.log('📊 Top 5 months by churn count:', topMonths);
+  
+  // Calculate percentage for Dec 2024
+  const dec2024Count = monthlyMap.get('2024-12') || 0;
+  const dec2024Percentage = ((dec2024Count / records.length) * 100).toFixed(1);
+  console.log(`⚠️  December 2024: ${dec2024Count} churns (${dec2024Percentage}% of total ${records.length} records)`);
   const monthlyTrend: MonthlyTrendData[] = Array.from(monthlyMap.entries())
     .map(([month, churns]) => ({
       month,
