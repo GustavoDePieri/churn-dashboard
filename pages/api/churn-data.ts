@@ -1,7 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getGoogleSheetsData } from '@/lib/googleSheets';
 import { analyzeChurnData } from '@/lib/churnAnalytics';
-import { generateChurnInsights, generateProductFeedbackInsights } from '@/lib/geminiAI';
 import { ChurnAnalysis } from '@/types';
 
 export default async function handler(
@@ -20,16 +19,15 @@ export default async function handler(
       return res.status(404).json({ error: 'No churn data found' });
     }
 
-    // Perform analytics
+    // Perform analytics (fast - no AI)
     const analysisData = analyzeChurnData(churnRecords);
 
-    // Generate AI insights (both detailed and executive summary)
-    const { insights, executiveSummary } = await generateChurnInsights(churnRecords, analysisData);
-
+    // Return data immediately without AI insights
+    // AI insights will be fetched separately by the frontend
     const response: ChurnAnalysis = {
       ...analysisData,
-      aiInsights: insights,
-      executiveSummary,
+      aiInsights: '', // Loaded separately
+      executiveSummary: '', // Loaded separately
     };
 
     res.status(200).json(response);

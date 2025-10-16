@@ -6,9 +6,6 @@ import {
   Bar,
   LineChart,
   Line,
-  PieChart,
-  Pie,
-  Cell,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -19,16 +16,12 @@ import {
 import { ReactivationAnalysis } from '@/types';
 import MetricCard from '@/components/MetricCard';
 import ChartCard from '@/components/ChartCard';
-import AIInsightsEnhanced from '@/components/AIInsightsEnhanced';
 import LoadingSpinner from '@/components/LoadingSpinner';
-import { darkChartStyles, brandColors } from '@/lib/chartStyles';
-
-const COLORS = brandColors;
+import { darkChartStyles } from '@/lib/chartStyles';
 
 export default function Reactivations() {
   const [data, setData] = useState<ReactivationAnalysis | null>(null);
   const [loading, setLoading] = useState(true);
-  const [aiLoading, setAiLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -42,24 +35,14 @@ export default function Reactivations() {
 
         const reactivationData = await response.json();
         setData(reactivationData);
-        setLoading(false);
-        
-        // Check if AI insights are loaded
-        if (reactivationData.aiInsights && reactivationData.aiInsights.length > 10) {
-          setAiLoading(false);
-        }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');
+      } finally {
         setLoading(false);
-        setAiLoading(false);
       }
     }
 
     fetchData();
-    
-    // Simulate AI finishing
-    const aiTimeout = setTimeout(() => setAiLoading(false), 2000);
-    return () => clearTimeout(aiTimeout);
   }, []);
 
   if (loading) {
@@ -76,7 +59,7 @@ export default function Reactivations() {
           <h1 className="text-2xl font-bold text-white mb-4">Error Loading Dashboard</h1>
           <p className="text-white/70">{error || 'No data available'}</p>
           <Link href="/" className="mt-6 inline-block px-6 py-3 bg-gradient-cta text-white rounded-xl hover:scale-105 transition-all font-bold">
-            ← Back to Churn Dashboard
+            ← Back to Dashboard
           </Link>
         </div>
       </div>
@@ -86,8 +69,8 @@ export default function Reactivations() {
   return (
     <>
       <Head>
-        <title>Reactivations Dashboard - AI Analysis</title>
-        <meta name="description" content="AI-powered reactivation analysis dashboard" />
+        <title>Reactivations Dashboard - Ontop</title>
+        <meta name="description" content="Customer reactivation analysis" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
@@ -101,25 +84,25 @@ export default function Reactivations() {
                 <svg className="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                 </svg>
-                <span className="font-medium">Back to Dashboard</span>
+                <span className="font-medium">Dashboard</span>
               </Link>
-              <Link href="/monthly-report" className="inline-flex items-center space-x-2 text-purple-main hover:text-pink-main transition-colors group">
+              <Link href="/monthly-report" className="inline-flex items-center space-x-2 text-purple-main hover:text-pink-main transition-colors">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                 </svg>
-                <span className="font-medium">Monthly Report</span>
+                <span className="font-medium">Full Report</span>
               </Link>
             </div>
             <h1 className="text-5xl font-bold gradient-text mb-3">
-              Reactivations Dashboard
+              Reactivations
             </h1>
             <p className="text-xl text-white/70">
-              Customer reactivation analysis powered by Google Gemini 2.5 Flash
+              Customers who came back
             </p>
           </div>
 
           {/* Key Metrics */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <MetricCard
               title="Total Reactivations"
               value={data.totalReactivations}
@@ -134,7 +117,7 @@ export default function Reactivations() {
             <MetricCard
               title="MRR Recovered"
               value={`$${data.totalMRRRecovered.toFixed(0)}`}
-              subtitle="Total monthly recurring revenue"
+              subtitle="Monthly recurring revenue"
               trend="up"
               icon={
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -145,7 +128,7 @@ export default function Reactivations() {
             <MetricCard
               title="Avg MRR per Reactivation"
               value={`$${data.averageMRR.toFixed(0)}`}
-              subtitle="Average revenue recovered"
+              subtitle="Average revenue per client"
               icon={
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
@@ -154,22 +137,16 @@ export default function Reactivations() {
             />
           </div>
 
-          {/* AI Insights */}
-          <div className="mb-8">
-            <AIInsightsEnhanced insights={data.aiInsights} isLoading={aiLoading} />
-          </div>
-
-          {/* Charts Grid */}
+          {/* Reactivation Reasons */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-            {/* Reactivation Reasons */}
             <ChartCard
-              title="Top Reactivation Reasons"
+              title="✅ Top Reactivation Reasons"
               description="Why customers came back"
             >
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={data.topReactivationReasons.slice(0, 8)}>
+              <ResponsiveContainer width="100%" height={350}>
+                <BarChart data={data.topReactivationReasons.slice(0, 6)}>
                   <CartesianGrid {...darkChartStyles.cartesianGrid} />
-                  <XAxis dataKey="category" angle={-45} textAnchor="end" height={100} {...darkChartStyles.axis} />
+                  <XAxis dataKey="category" angle={-45} textAnchor="end" height={120} {...darkChartStyles.axis} />
                   <YAxis {...darkChartStyles.axis} />
                   <Tooltip {...darkChartStyles.tooltip} />
                   <Bar dataKey="count" fill="url(#reactivationBarGradient)" />
@@ -183,39 +160,11 @@ export default function Reactivations() {
               </ResponsiveContainer>
             </ChartCard>
 
-            {/* CS Path Distribution */}
             <ChartCard
-              title="Customer Success Path Distribution"
-              description="Reactivations by CS approach"
+              title="📈 Monthly Reactivation Trend"
+              description="Reactivations and MRR over time"
             >
-              <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
-                  <Pie
-                    data={data.reactivationsByCSPath}
-                    dataKey="count"
-                    nameKey="category"
-                    cx="50%"
-                    cy="50%"
-                    outerRadius={100}
-                    label={(entry) => `${entry.category} (${entry.percentage.toFixed(0)}%)`}
-                    labelLine={{stroke: '#ffffff'}}
-                    style={{fill: '#ffffff'}}
-                  >
-                    {data.reactivationsByCSPath.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip {...darkChartStyles.tooltip} />
-                </PieChart>
-              </ResponsiveContainer>
-            </ChartCard>
-
-            {/* Monthly Trend */}
-            <ChartCard
-              title="Monthly Reactivation Trend"
-              description="Reactivations and MRR recovered over time"
-            >
-              <ResponsiveContainer width="100%" height={300}>
+              <ResponsiveContainer width="100%" height={350}>
                 <LineChart data={data.monthlyReactivations}>
                   <CartesianGrid {...darkChartStyles.cartesianGrid} />
                   <XAxis dataKey="month" {...darkChartStyles.axis} />
@@ -227,45 +176,6 @@ export default function Reactivations() {
                   <Line yAxisId="right" type="monotone" dataKey="mrr" stroke="#8b5cf6" strokeWidth={3} name="MRR ($)" dot={{fill: '#8b5cf6', r: 4}} />
                 </LineChart>
               </ResponsiveContainer>
-            </ChartCard>
-
-            {/* Reactivation Reasons Table */}
-            <ChartCard
-              title="Detailed Reactivation Breakdown"
-              description="Complete list of reactivation reasons"
-            >
-              <div className="overflow-x-auto max-h-80">
-                <table className="min-w-full">
-                  <thead className="sticky top-0 glass">
-                    <tr className="border-b border-white/10">
-                      <th className="px-4 py-3 text-left text-xs font-bold text-white/80 uppercase">
-                        Reason
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-bold text-white/80 uppercase">
-                        Count
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-bold text-white/80 uppercase">
-                        %
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {data.topReactivationReasons.map((reason, index) => (
-                      <tr key={index} className="border-b border-white/5 hover:bg-white/5 transition-colors">
-                        <td className="px-4 py-3 text-sm text-white font-medium">
-                          {reason.category}
-                        </td>
-                        <td className="px-4 py-3 text-sm text-green-400 font-semibold">
-                          {reason.count}
-                        </td>
-                        <td className="px-4 py-3 text-sm text-white/70">
-                          {reason.percentage.toFixed(1)}%
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
             </ChartCard>
           </div>
 

@@ -1,7 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getReactivationsData } from '@/lib/googleSheets';
 import { analyzeReactivationData } from '@/lib/reactivationAnalytics';
-import { generateReactivationInsights } from '@/lib/geminiAI';
 import { ReactivationAnalysis } from '@/types';
 
 export default async function handler(
@@ -20,15 +19,13 @@ export default async function handler(
       return res.status(404).json({ error: 'No reactivation data found' });
     }
 
-    // Perform analytics
+    // Perform analytics (fast - no AI)
     const analysisData = analyzeReactivationData(reactivationRecords);
 
-    // Generate AI insights
-    const aiInsights = await generateReactivationInsights(reactivationRecords, analysisData);
-
+    // Return data immediately without AI insights for faster loading
     const response: ReactivationAnalysis = {
       ...analysisData,
-      aiInsights,
+      aiInsights: '', // Not needed for simple reactivations view
     };
 
     res.status(200).json(response);
