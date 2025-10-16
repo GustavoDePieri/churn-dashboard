@@ -175,6 +175,7 @@ export function analyzeChurnData(records: ChurnRecord[]): Omit<ChurnAnalysis, 'a
   // Monthly trend - churns only
   // Reactivations by month calculated in monthly-report API with reactivations data
   const monthlyMap = new Map<string, number>();
+  const dateFrequencyMap = new Map<string, number>(); // Track exact date frequencies
   let parseErrors = 0;
   let parsedCount = 0;
   
@@ -186,6 +187,12 @@ export function analyzeChurnData(records: ChurnRecord[]): Omit<ChurnAnalysis, 'a
         const existing = monthlyMap.get(month) || 0;
         monthlyMap.set(month, existing + 1);
         parsedCount++;
+        
+        // Track exact date frequency for Dec 2024
+        if (month === '2024-12') {
+          const dateCount = dateFrequencyMap.get(r.churnDate) || 0;
+          dateFrequencyMap.set(r.churnDate, dateCount + 1);
+        }
         
         // Log first few for debugging
         if (idx < 5) {
@@ -219,6 +226,18 @@ export function analyzeChurnData(records: ChurnRecord[]): Omit<ChurnAnalysis, 'a
   const dec2024Count = monthlyMap.get('2024-12') || 0;
   const dec2024Percentage = ((dec2024Count / records.length) * 100).toFixed(1);
   console.log(`⚠️  December 2024: ${dec2024Count} churns (${dec2024Percentage}% of total ${records.length} records)`);
+  
+  // Show date distribution for Dec 2024
+  if (dateFrequencyMap.size > 0) {
+    const topDates = Array.from(dateFrequencyMap.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 10);
+    console.log('📅 December 2024 date distribution (top 10):');
+    topDates.forEach(([date, count]) => {
+      console.log(`  ${date}: ${count} churns (${((count / dec2024Count) * 100).toFixed(1)}% of Dec)`);
+    });
+    console.log(`  Total unique dates in Dec 2024: ${dateFrequencyMap.size}`);
+  }
   const monthlyTrend: MonthlyTrendData[] = Array.from(monthlyMap.entries())
     .map(([month, churns]) => ({
       month,
