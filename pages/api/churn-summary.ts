@@ -21,16 +21,22 @@ export default async function handler(
   }
 
   try {
+    console.log('📊 churn-summary: Fetching data...');
+    
     // Fetch both data sources
     const [churnRecords, reactivationRecords] = await Promise.all([
       getGoogleSheetsData(),
       getReactivationsData(),
     ]);
 
+    console.log(`📊 churn-summary: Got ${churnRecords.length} churns, ${reactivationRecords.length} reactivations`);
+
     const analysis = analyzeChurnData(churnRecords);
 
     // Use the centralized reactivation calculator (SINGLE SOURCE OF TRUTH)
     const metrics = calculateReactivationMetrics(reactivationRecords, churnRecords.length);
+
+    console.log(`📊 churn-summary: Avg days = ${metrics.averageDaysToReactivation}`);
 
     const response: ChurnSummary = {
       totalChurns: churnRecords.length,
@@ -41,9 +47,10 @@ export default async function handler(
       topCompetitorMRR: analysis.competitorAnalysis[0]?.totalMRR || 0,
     };
 
+    console.log('✅ churn-summary: Success', response);
     res.status(200).json(response);
   } catch (error) {
-    console.error('Error in churn-summary API:', error);
+    console.error('❌ churn-summary API ERROR:', error);
     res.status(500).json({ error: 'Failed to fetch churn summary' });
   }
 }
