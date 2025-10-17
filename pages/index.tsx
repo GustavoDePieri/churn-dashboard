@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
+import { useSession } from 'next-auth/react';
 import {
   BarChart,
   Bar,
@@ -18,15 +19,18 @@ import MetricCard from '@/components/MetricCard';
 import ChartCard from '@/components/ChartCard';
 import AIInsightsEnhanced from '@/components/AIInsightsEnhanced';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import Header from '@/components/Header';
 import { darkChartStyles, brandColors } from '@/lib/chartStyles';
 
 export default function Home() {
+  const { data: session, status } = useSession();
   const [data, setData] = useState<ChurnAnalysis | null>(null);
   const [summary, setSummary] = useState<any>(null);
   const [aiInsights, setAiInsights] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [aiLoading, setAiLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
 
   useEffect(() => {
     // Fetch data FAST (without AI)
@@ -183,6 +187,8 @@ export default function Home() {
           setSummary(summaryData);
         }
         
+        // Update timestamp
+        setLastUpdated(new Date());
         setLoading(false);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');
@@ -236,9 +242,11 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
+      <Header lastUpdated={lastUpdated} />
+
       <main className="min-h-screen py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          {/* Header */}
+          {/* Page Title */}
           <div className="mb-10">
             <div className="flex justify-between items-center mb-6">
               <div>

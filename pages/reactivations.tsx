@@ -17,12 +17,14 @@ import { ReactivationAnalysis } from '@/types';
 import MetricCard from '@/components/MetricCard';
 import ChartCard from '@/components/ChartCard';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import Header from '@/components/Header';
 import { darkChartStyles } from '@/lib/chartStyles';
 
 export default function Reactivations() {
   const [data, setData] = useState<ReactivationAnalysis | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
 
   useEffect(() => {
     async function fetchData() {
@@ -35,6 +37,7 @@ export default function Reactivations() {
 
         const reactivationData = await response.json();
         setData(reactivationData);
+        setLastUpdated(new Date());
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');
       } finally {
@@ -75,9 +78,11 @@ export default function Reactivations() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
+      <Header lastUpdated={lastUpdated} />
+
       <main className="min-h-screen py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          {/* Header */}
+          {/* Page Title */}
           <div className="mb-10">
             <div className="flex gap-3 mb-6">
               <Link href="/" className="inline-flex items-center space-x-2 text-purple-main hover:text-pink-main transition-colors group">

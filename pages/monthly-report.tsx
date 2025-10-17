@@ -24,6 +24,7 @@ import ChartCard from '@/components/ChartCard';
 import AIInsightsEnhanced from '@/components/AIInsightsEnhanced';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import DateRangeFilter from '@/components/DateRangeFilter';
+import Header from '@/components/Header';
 import { darkChartStyles, brandColors } from '@/lib/chartStyles';
 
 const COLORS = brandColors;
@@ -33,6 +34,7 @@ export default function MonthlyReport() {
   const [loading, setLoading] = useState(true);
   const [aiLoading, setAiLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
   
   // Date filter state
   const [startDate, setStartDate] = useState(format(startOfMonth(subMonths(new Date(), 5)), 'yyyy-MM-dd'));
@@ -51,6 +53,7 @@ export default function MonthlyReport() {
 
       const reportData = await response.json();
       setData(reportData);
+      setLastUpdated(new Date());
       setLoading(false);
       
       if (reportData.aiInsights && reportData.aiInsights.length > 10) {
@@ -116,9 +119,11 @@ export default function MonthlyReport() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
+      <Header lastUpdated={lastUpdated} />
+
       <main className="min-h-screen py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          {/* Header */}
+          {/* Page Title */}
           <div className="mb-8">
             <div className="flex justify-between items-start mb-6">
               <div>
