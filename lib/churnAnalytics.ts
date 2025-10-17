@@ -68,6 +68,14 @@ export function analyzeChurnData(records: ChurnRecord[]): Omit<ChurnAnalysis, 'a
   // via calculateReactivationMetrics utility (single source of truth)
   const averageReactivationDays = 0; // Placeholder - calculated elsewhere
 
+  // Calculate average months before churn (customer lifetime)
+  const recordsWithMonths = records.filter(r => r.monthsBeforeChurn !== undefined && r.monthsBeforeChurn !== null);
+  const averageMonthsBeforeChurn = recordsWithMonths.length > 0
+    ? recordsWithMonths.reduce((sum, r) => sum + (r.monthsBeforeChurn || 0), 0) / recordsWithMonths.length
+    : 0;
+
+  console.log(`📊 Customer Lifetime: Average ${averageMonthsBeforeChurn.toFixed(1)} months before churn (from ${recordsWithMonths.length}/${totalChurns} records with data)`);
+
   // Calculate MRR lost
   const totalMRRLost = records.reduce((sum, r) => sum + (r.mrr || 0), 0);
   const averageMRRPerChurn = totalChurns > 0 ? totalMRRLost / totalChurns : 0;
@@ -289,6 +297,7 @@ export function analyzeChurnData(records: ChurnRecord[]): Omit<ChurnAnalysis, 'a
   return {
     totalChurns,
     averageReactivationDays,
+    averageMonthsBeforeChurn,
     totalMRRLost,
     averageMRRPerChurn,
     topChurnCategories,

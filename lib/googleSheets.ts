@@ -33,7 +33,7 @@ export async function getGoogleSheetsData(): Promise<ChurnRecord[]> {
 
     const sheets = google.sheets({ version: 'v4', auth });
     const spreadsheetId = process.env.GOOGLE_SHEETS_ID;
-    const range = `${process.env.GOOGLE_SHEETS_TAB}!A:T`; // Extended to column T for new structure
+    const range = `${process.env.GOOGLE_SHEETS_TAB}!A:U`; // Extended to column U for Created Date
 
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId,
@@ -46,14 +46,16 @@ export async function getGoogleSheetsData(): Promise<ChurnRecord[]> {
     }
 
     // Skip header row and map data
-    // UPDATED Column mapping (October 2025 - Latest):
+    // UPDATED Column mapping (January 2025 - Latest):
     // A=Account Name, B=CS Group, C=Platform Client ID, D=Cs Sub-Group,
     // E=Last Invoice MRR, F=TPV Last Month, G=Warning Metrics, H=Warning Explanation,
     // I=Churn Explanation ST, J=Primary Churn Category, K=Warning Reason,
     // L=Account ID, M=Avg MRR, N=Avg TPV, O=Last Effective Payment Date,
-    // P=Competitor Name, Q=Last Invoice Date, R=Owner Area, S=Account Owner, T=Estimated Churn Date
+    // P=Competitor Name, Q=Owner Area, R=Account Owner, S=Estimated Churn Date,
+    // T=Last Invoiced/Paid Date, U=Created Date
     const records: ChurnRecord[] = rows.slice(1).map((row, index) => {
-      const churnDate = row[19] || ''; // Column T - Estimated Churn Date (UPDATED!)
+      const churnDate = row[18] || ''; // Column S - Estimated Churn Date
+      const createdDate = row[20] || ''; // Column U - Created Date (NEW!)
       
       // Helper function to parse and validate monetary values
       const parseMoney = (value: any, clientName: string): number | undefined => {
@@ -73,13 +75,31 @@ export async function getGoogleSheetsData(): Promise<ChurnRecord[]> {
       const mrrValue = row[4] || row[12]; // Column E (Last Invoice MRR) or M (Avg MRR)
       const tpvValue = row[5] || row[13]; // Column F (TPV Last Month) or N (Avg TPV)
 
+      // Calculate months before churn
+      let monthsBeforeChurn: number | undefined = undefined;
+      if (createdDate && churnDate) {
+        try {
+          const created = new Date(createdDate);
+          const churned = new Date(churnDate);
+          if (!isNaN(created.getTime()) && !isNaN(churned.getTime())) {
+            const diffTime = Math.abs(churned.getTime() - created.getTime());
+            const diffMonths = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 30.44)); // Average days per month
+            monthsBeforeChurn = diffMonths;
+          }
+        } catch (error) {
+          console.warn(`⚠️  Error calculating months before churn for ${clientName}`);
+        }
+      }
+
       return {
         id: row[2] || row[11] || `record-${index}`, // Column C (Platform Client ID) or L (Account ID) - prioritize Platform Client ID for matching
         clientName,
         churnDate: churnDate,
+        createdDate: createdDate, // NEW: Account creation date
+        monthsBeforeChurn: monthsBeforeChurn, // NEW: Calculated months from creation to churn
         churnCategory: row[9] || 'Uncategorized', // Column J - Primary Churn Category
         serviceCategory: row[1] || row[3] || 'Unknown', // Column B (CS Group) or D (Cs Sub-Group)
-        competitor: row[15] || undefined, // Column P - Competitor Name (UPDATED: moved from Q!)
+        competitor: row[15] || undefined, // Column P - Competitor Name
         mrr: parseMoney(mrrValue, clientName),
         price: parseMoney(tpvValue, clientName),
         feedback: row[8] || row[7] || undefined, // Column I (Churn Explanation ST) or H (Warning Explanation)

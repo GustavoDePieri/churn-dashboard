@@ -2,6 +2,8 @@ export interface ChurnRecord {
   id: string;
   clientName: string;
   churnDate: string;
+  createdDate?: string; // NEW: Account creation date
+  monthsBeforeChurn?: number; // NEW: Months from creation to churn
   churnCategory: string;
   competitor?: string;
   mrr?: number;
@@ -15,6 +17,7 @@ export interface ChurnRecord {
 export interface ChurnAnalysis {
   totalChurns: number;
   averageReactivationDays: number;
+  averageMonthsBeforeChurn: number; // NEW: Average customer lifetime before churn
   totalMRRLost: number;
   averageMRRPerChurn: number;
   topChurnCategories: CategoryCount[];
