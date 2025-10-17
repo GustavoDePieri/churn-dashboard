@@ -100,7 +100,7 @@ After adding the environment variables:
 3. **Test the authentication:**
    - Visit your Vercel URL
    - You should be redirected to `/login`
-   - Login with: `admin@ontop.com` / `ontop2024`
+   - Login with: `admin@ontop.com` / `ontop2025`
    - You should see the dashboard with header
 
 ---
@@ -184,5 +184,5 @@ If you encounter issues:
 
 **Default Login:**
 - Email: `admin@ontop.com`
-- Password: `ontop2024`
+- Password: `ontop2025`
 

@@ -7,8 +7,8 @@ const users = [
   {
     id: '1',
     email: 'admin@ontop.com',
-    // Password: "ontop2024" (hashed)
-    password: '$2a$10$rKZxUQHXzN5sF1jW9XvlOOQxMPP9TxPYQk8Vz0nKJWcxQy0nZ3vXi',
+    // Password: "ontop2025" (hashed)
+    password: '$2b$10$C3lmnEQr25O9hRi.YeJYaOmf1L.vz3grXnkf92gdtj2aBMhylkhDC',
     name: 'Ontop Admin',
   },
 ];

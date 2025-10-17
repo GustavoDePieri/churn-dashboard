@@ -33,7 +33,7 @@
 **Login URL**: `/login`
 **Credentials**: 
 - Email: `admin@ontop.com`
-- Password: `ontop2024`
+- Password: `ontop2025`
 
 ### 3. **Professional Navigation Header** 🧭
 - **Ontop logo** - Clickable, returns to homepage
@@ -322,7 +322,7 @@ Your dashboard now has:
 
 **Default Login:**
 - Email: `admin@ontop.com`
-- Password: `ontop2024`
+- Password: `ontop2025`
 
 **Need to add users?** See `AUTHENTICATION_GUIDE.md` → "Adding New Users"
 

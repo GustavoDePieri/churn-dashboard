@@ -52,7 +52,7 @@ The Ontop Churn Dashboard now includes a complete authentication system with:
 
 ```
 Email: admin@ontop.com
-Password: ontop2024
+Password: ontop2025
 ```
 
 **Security Note**: These are demo credentials. For production, change the password hash in `pages/api/auth/[...nextauth].ts`.
@@ -80,7 +80,7 @@ Password: ontop2024
 
 4. **Login with demo credentials**:
    - Email: `admin@ontop.com`
-   - Password: `ontop2024`
+   - Password: `ontop2025`
 
 5. **You're in!** The header shows:
    - Ontop logo (click to return home)
