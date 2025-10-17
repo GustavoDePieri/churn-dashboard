@@ -31,12 +31,12 @@ export default function Header({ lastUpdated }: HeaderProps) {
         <div className="flex items-center justify-between h-20">
           {/* Logo - Clickable */}
           <Link href="/" className="flex items-center space-x-3 hover:opacity-80 transition-opacity group">
-            <div className="relative w-32 h-12 transition-transform group-hover:scale-105">
+            <div className="relative w-12 h-12 rounded-full overflow-hidden transition-transform group-hover:scale-105 shadow-lg ring-2 ring-purple-main/30">
               <Image
                 src="/logo.jpg"
                 alt="Ontop"
                 fill
-                style={{ objectFit: 'contain' }}
+                style={{ objectFit: 'cover' }}
                 priority
               />
             </div>

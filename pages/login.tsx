@@ -57,12 +57,12 @@ export default function Login() {
         <div className="glass rounded-3xl shadow-2xl w-full max-w-md p-8 relative z-10">
           {/* Logo */}
           <div className="flex justify-center mb-8">
-            <div className="relative w-48 h-24">
+            <div className="relative w-24 h-24 rounded-full overflow-hidden shadow-2xl ring-4 ring-purple-main/40">
               <Image
                 src="/logo.jpg"
                 alt="Ontop Logo"
                 fill
-                style={{ objectFit: 'contain' }}
+                style={{ objectFit: 'cover' }}
                 priority
               />
             </div>
