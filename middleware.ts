@@ -5,7 +5,6 @@ export const config = {
     '/',
     '/reactivations',
     '/monthly-report',
-    '/debug',
   ],
 };
 
