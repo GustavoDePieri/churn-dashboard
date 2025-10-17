@@ -4,10 +4,11 @@ export default function Document() {
   return (
     <Html lang="en">
       <Head>
-        {/* Favicons */}
-        <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+        {/* Favicons - Rounded */}
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <link rel="icon" type="image/png" href="/favicon.png" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <link rel="manifest" href="/site.webmanifest" />
         
         {/* Meta tags */}
         <meta name="theme-color" content="#8b5cf6" />
