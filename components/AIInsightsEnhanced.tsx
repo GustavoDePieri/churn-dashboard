@@ -51,17 +51,17 @@ export default function AIInsightsEnhanced({ insights, isLoading }: AIInsightsEn
   
   const getSectionIcon = (title: string) => {
     if (title.includes('CRITICAL')) return '🔴';
-    if (title.includes('SECONDARY')) return '🟡';
+    if (title.includes('QUICK WINS') || title.includes('SECONDARY')) return '🟡';
     if (title.includes('OPPORTUNITIES')) return '🟢';
-    if (title.includes('PRODUCT')) return '📊';
+    if (title.includes('PRODUCT ALERTS') || title.includes('PRODUCT')) return '📊';
     return '💡';
   };
 
   const getSectionColor = (title: string) => {
     if (title.includes('CRITICAL')) return 'border-coral-main/40 bg-coral-main/5';
-    if (title.includes('SECONDARY')) return 'border-yellow-500/40 bg-yellow-500/5';
+    if (title.includes('QUICK WINS') || title.includes('SECONDARY')) return 'border-yellow-500/40 bg-yellow-500/5';
     if (title.includes('OPPORTUNITIES')) return 'border-green-500/40 bg-green-500/5';
-    if (title.includes('PRODUCT')) return 'border-purple-main/40 bg-purple-main/5';
+    if (title.includes('PRODUCT ALERTS') || title.includes('PRODUCT')) return 'border-purple-main/40 bg-purple-main/5';
     return 'border-pink-main/40 bg-pink-main/5';
   };
 

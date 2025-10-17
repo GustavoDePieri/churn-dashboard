@@ -33,45 +33,52 @@ Format: 3 short, impactful sentences highlighting the most critical points.`;
     const summaryResult = await model.generateContent(summaryPrompt);
     const executiveSummary = summaryResult.response.text();
 
-    // Detailed Insights Prompt
-    const detailedPrompt = `You are a business analyst. Analyze this churn data using Problem → Impact → Recommendation format:
+    // Detailed Insights Prompt - CONCISE VERSION
+    const detailedPrompt = `You are a senior executive analyst. Create CONCISE, executive-level insights.
 
 METRICS:
 - Total Churns: ${analysisData.totalChurns}
 - Total MRR Lost: $${analysisData.totalMRRLost.toFixed(0)}
-- Avg MRR per Churn: $${analysisData.averageMRRPerChurn.toFixed(0)}
-- Avg Reactivation Time: ${analysisData.averageReactivationDays.toFixed(1)} days
+- Top 3 Churn Reasons: ${analysisData.topChurnCategories.slice(0, 3).map((c: any) => `${c.category} (${c.percentage.toFixed(1)}%)`).join(', ')}
+- Avg Reactivation: ${analysisData.averageReactivationDays.toFixed(0)} days
 
-CHURN CATEGORIES:
-${analysisData.topChurnCategories.map((c: any) => `- ${c.category}: ${c.count} churns (${c.percentage.toFixed(1)}%) - $${(c.count * analysisData.averageMRRPerChurn).toFixed(0)} MRR impact`).join('\n')}
+COMPETITORS WINNING:
+${analysisData.competitorAnalysis.slice(0, 3).map((c: any) => `- ${c.competitor}: $${c.totalMRR.toFixed(0)} lost`).join('\n')}
 
-CLIENT FEEDBACK THEMES:
-${analysisData.clientFeedbackCategories?.map((c: any) => `- ${c.category}: ${c.count} mentions (${c.percentage.toFixed(1)}%)`).join('\n') || 'No feedback data'}
+RULES:
+- Maximum 2 critical issues ONLY
+- Each issue: 1 problem line, 1 impact line, 1 recommendation line
+- Secondary concerns: max 3 bullets
+- Opportunities: max 3 bullets
+- Product feedback: max 3 bullets
+- NO fluff, NO explanations, ONLY actionable insights
+- Use specific numbers from data
 
-COMPETITOR IMPACT:
-${analysisData.competitorAnalysis.map((c: any) => `- ${c.competitor}: ${c.count} churns, $${c.totalMRR.toFixed(0)} MRR lost`).join('\n')}
+Format:
 
-REACTIVATION INSIGHTS:
-${analysisData.reactivationByChurnCategory.slice(0, 5).map((r: any) => `- ${r.churnCategory}: ${r.reactivationRate.toFixed(1)}% return rate, ${r.averageDaysToReactivation.toFixed(0)} days avg`).join('\n')}
+## 🔴 CRITICAL ISSUES
+**Problem:** [Top issue] - [%]
+**Impact:** $[exact amount] MRR lost
+**Recommendation:** [Single specific action]
 
-Provide analysis in this exact format:
+**Problem:** [Second issue] - [%]
+**Impact:** $[exact amount] MRR lost
+**Recommendation:** [Single specific action]
 
-## 🔴 CRITICAL ISSUES (Highest Priority)
-For each top issue:
-**Problem:** [issue name] - [% of churns]
-**Impact:** $[MRR lost] monthly revenue impact
-**Recommendation:** [specific action item]
-
-## 🟡 SECONDARY CONCERNS
-Brief bullet points with quick fixes
+## 🟡 QUICK WINS
+- [Action 1]
+- [Action 2]
+- [Action 3]
 
 ## 🟢 OPPORTUNITIES
-Reactivation strategies and preventive measures
+- [Reactivation strategy 1]
+- [Prevention measure 1]
+- [Growth opportunity 1]
 
-## 📊 PRODUCT FEEDBACK INTEGRATION
-Key themes to share with product team for dashboard sync
-
-Keep each section concise and action-oriented.`;
+## 📊 PRODUCT ALERTS
+- [Critical product issue to address]
+- [Feature gap identified]
+- [User experience concern]`;
 
     const detailedResult = await model.generateContent(detailedPrompt);
     const insights = detailedResult.response.text();
