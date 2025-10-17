@@ -4,15 +4,15 @@
   "description": "AI-powered churn analytics dashboard",
   "icons": [
     {
-      "src": "/favicon.png",
+      "src": "/logo.jpg",
       "sizes": "192x192",
-      "type": "image/png",
+      "type": "image/jpeg",
       "purpose": "any maskable"
     },
     {
-      "src": "/apple-touch-icon.png",
+      "src": "/logo.jpg",
       "sizes": "512x512",
-      "type": "image/png",
+      "type": "image/jpeg",
       "purpose": "any maskable"
     }
   ],

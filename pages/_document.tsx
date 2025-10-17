@@ -4,9 +4,9 @@ export default function Document() {
   return (
     <Html lang="en">
       <Head>
-        {/* Favicons - Rounded */}
-        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        {/* Favicons - Using actual Ontop logo */}
         <link rel="icon" type="image/png" href="/favicon.png" />
+        <link rel="icon" type="image/x-icon" href="/favicon.ico" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <link rel="manifest" href="/site.webmanifest" />
         
