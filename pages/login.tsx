@@ -142,13 +142,6 @@ export default function Login() {
               )}
             </button>
           </form>
-
-          {/* Demo Credentials */}
-          <div className="mt-6 p-4 glass-light rounded-xl border border-white/10">
-            <p className="text-xs text-white/60 mb-2 font-semibold">Demo Credentials:</p>
-            <p className="text-xs text-white/80 font-mono">Email: admin@ontop.com</p>
-            <p className="text-xs text-white/80 font-mono">Password: ontop2025</p>
-          </div>
         </div>
 
         {/* Footer */}
