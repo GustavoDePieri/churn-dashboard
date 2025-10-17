@@ -4,6 +4,7 @@ import { analyzeChurnData } from '@/lib/churnAnalytics';
 import { analyzeReactivationData } from '@/lib/reactivationAnalytics';
 import { generateChurnInsights } from '@/lib/geminiAI';
 import { parseISO, isWithinInterval, differenceInDays } from 'date-fns';
+import { calculateReactivationMetrics } from '@/lib/utils/reactivationCalculator';
 
 interface MonthlyReportData {
   // Filtered data
@@ -91,52 +92,89 @@ export default async function handler(
     const matchedClients: any[] = [];
     const churnMap = new Map<string, any>();
     
-    // Index churns by client identifiers
+    // Helper function to normalize names for matching
+    const normalizeName = (name: string): string => {
+      if (!name) return '';
+      return name
+        .toLowerCase()
+        .trim()
+        .replace(/\s+/g, ' ')
+        .replace(/[.,\-()]/g, '')
+        .replace(/\b(inc|llc|ltd|corp|corporation|sa|sas|spa)\b/g, '')
+        .trim();
+    };
+    
+    // Index churns by multiple identifiers for better matching
     filteredChurns.forEach(churn => {
-      const key = (churn.clientName || '').toLowerCase().trim();
-      if (key) {
-        churnMap.set(key, churn);
+      // Index by Platform Client ID (most reliable)
+      if (churn.id) {
+        churnMap.set(`id:${churn.id}`, churn);
+      }
+      // Index by normalized account name
+      const nameKey = normalizeName(churn.clientName);
+      if (nameKey) {
+        churnMap.set(`name:${nameKey}`, churn);
       }
     });
 
-    // Match reactivations with churns
-    filteredReactivations.forEach(reactivation => {
-      const key = (reactivation.accountName || '').toLowerCase().trim();
-      const churn = churnMap.get(key);
+    console.log(`📊 Monthly Report: Indexed ${filteredChurns.length} churns for matching`);
+
+    // Match reactivations with churns using the churnDate from REACTIVATIONS SHEET (Column J)
+    filteredReactivations.forEach((reactivation, index) => {
+      let matchedChurn = null;
       
-      if (churn && churn.churnDate && reactivation.reactivationDate) {
+      // Try matching by Platform Client ID first (most reliable)
+      if (reactivation.id) {
+        matchedChurn = churnMap.get(`id:${reactivation.id}`);
+      }
+      
+      // Fallback to name matching
+      if (!matchedChurn) {
+        const nameKey = normalizeName(reactivation.accountName);
+        if (nameKey) {
+          matchedChurn = churnMap.get(`name:${nameKey}`);
+        }
+      }
+      
+      // Use churnDate from REACTIVATIONS SHEET (Column J) - this is the key fix!
+      if (reactivation.churnDate && reactivation.reactivationDate) {
         try {
-          const churnDate = parseISO(churn.churnDate);
+          const churnDate = parseISO(reactivation.churnDate);
           const reactivationDate = parseISO(reactivation.reactivationDate);
           const daysToReactivate = differenceInDays(reactivationDate, churnDate);
           
           // Only consider reactivations after churn (positive days)
           if (daysToReactivate > 0) {
             matchedClients.push({
-              clientName: reactivation.accountName,
-              churnDate: churn.churnDate,
+              clientName: reactivation.accountName || 'Unknown',
+              churnDate: reactivation.churnDate,
               reactivationDate: reactivation.reactivationDate,
               daysToReactivate,
-              churnCategory: churn.churnCategory || 'Unknown',
+              churnCategory: matchedChurn?.churnCategory || 'Unknown',
               reactivationReason: reactivation.reactivationReason || 'Unknown',
               mrrRecovered: reactivation.mrr || 0,
             });
+          } else {
+            console.warn(`⚠️  Reactivation #${index + 1}: Invalid days (${daysToReactivate})`);
           }
         } catch (error) {
-          console.warn('Error matching client:', key, error);
+          console.error(`❌ Error parsing dates for reactivation #${index + 1}:`, error);
         }
       }
     });
 
-    // Calculate cross-analysis metrics
+    console.log(`✅ Monthly Report: Matched ${matchedClients.length} clients with reactivations`);
+
+    // Calculate cross-analysis metrics using the centralized calculator
+    const reactivationMetrics = calculateReactivationMetrics(filteredReactivations, filteredChurns.length);
+    
     const reactivatedFromChurns = matchedClients.length;
     const reactivationRate = filteredChurns.length > 0 
       ? (reactivatedFromChurns / filteredChurns.length) * 100 
       : 0;
     
-    const averageDaysToReactivation = matchedClients.length > 0
-      ? matchedClients.reduce((sum, c) => sum + c.daysToReactivate, 0) / matchedClients.length
-      : 0;
+    // Use centralized calculator for consistency with main dashboard
+    const averageDaysToReactivation = reactivationMetrics.averageDaysToReactivation;
 
     // Analyze reactivations by churn category
     const reactivationsByChurnCategoryMap = new Map<string, number>();

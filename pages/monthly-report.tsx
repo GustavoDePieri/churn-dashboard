@@ -293,6 +293,51 @@ export default function MonthlyReport() {
             </ChartCard>
           </div>
 
+          {/* Monthly Churn Categories Stacked Chart */}
+          {churnAnalysis.monthlyChurnByCategory && churnAnalysis.monthlyChurnByCategory.length > 0 && (
+            <div className="mb-8">
+              <ChartCard
+                title="📊 Monthly Churn Categories Breakdown"
+                description="Churn categories tracked month-by-month"
+              >
+                <ResponsiveContainer width="100%" height={400}>
+                  <BarChart data={churnAnalysis.monthlyChurnByCategory}>
+                    <CartesianGrid {...darkChartStyles.cartesianGrid} />
+                    <XAxis 
+                      dataKey="month" 
+                      {...darkChartStyles.axis}
+                      tickFormatter={(value) => {
+                        const date = new Date(value + '-01');
+                        return date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
+                      }}
+                    />
+                    <YAxis {...darkChartStyles.axis} label={{ value: 'Churns', angle: -90, position: 'insideLeft', style: {fill: '#ffffff'} }} />
+                    <Tooltip 
+                      {...darkChartStyles.tooltip}
+                      labelFormatter={(value) => {
+                        const date = new Date(value + '-01');
+                        return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+                      }}
+                    />
+                    <Legend {...darkChartStyles.legend} />
+                    {churnAnalysis.topChurnCategories.slice(0, 5).map((cat: any, index: number) => (
+                      <Bar 
+                        key={cat.category} 
+                        dataKey={cat.category} 
+                        stackId="churn" 
+                        fill={brandColors[index % brandColors.length]}
+                        name={cat.category.length > 25 ? cat.category.substring(0, 22) + '...' : cat.category}
+                      />
+                    ))}
+                    {churnAnalysis.monthlyChurnByCategory.some((m: any) => m.Other) && (
+                      <Bar dataKey="Other" stackId="churn" fill="#6b7280" name="Other" />
+                    )}
+                  </BarChart>
+                </ResponsiveContainer>
+              </ChartCard>
+            </div>
+          )}
+
           {/* Boss Requirements Section 2: When Clients Come Back & Time Analysis */}
           <ChartCard
             title="⏱️ Reactivation Timeline - When Do Clients Come Back?"
