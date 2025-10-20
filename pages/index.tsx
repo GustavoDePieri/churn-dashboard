@@ -52,6 +52,7 @@ export default function Home() {
       executiveSummary: data.executiveSummary,
       averageReactivationDays: summary?.averageReactivationDays || data.averageReactivationDays || 0,
       reactivationByChurnCategory: data.reactivationByChurnCategory, // Preserve original reactivation rates
+      monthlyTrend: data.monthlyTrend, // Preserve original monthly trend with reactivations
     };
   }, [data, rawChurnRecords, selectedPeriod, summary]);
 
