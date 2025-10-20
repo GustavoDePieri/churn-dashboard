@@ -44,13 +44,15 @@ export default function Home() {
     const filteredRecords = filterChurnRecords(rawChurnRecords, selectedPeriod);
     const reanalyzedData = analyzeChurnData(filteredRecords);
     
-    // Merge with AI insights and executive summary from original data
+    // Merge with AI insights, executive summary, and reactivation days from summary/original data
+    // Note: averageReactivationDays is calculated from reactivations sheet, independent of churn filter
     return {
       ...reanalyzedData,
       aiInsights: data.aiInsights,
       executiveSummary: data.executiveSummary,
+      averageReactivationDays: summary?.averageReactivationDays || data.averageReactivationDays || 0,
     };
-  }, [data, rawChurnRecords, selectedPeriod]);
+  }, [data, rawChurnRecords, selectedPeriod, summary]);
 
   useEffect(() => {
     // Fetch data FAST (without AI)
