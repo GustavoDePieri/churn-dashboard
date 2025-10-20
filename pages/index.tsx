@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
@@ -14,16 +14,20 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts';
-import { ChurnAnalysis } from '@/types';
+import { ChurnAnalysis, ChurnRecord } from '@/types';
 import MetricCard from '@/components/MetricCard';
 import ChartCard from '@/components/ChartCard';
 import AIInsightsEnhanced from '@/components/AIInsightsEnhanced';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import Header from '@/components/Header';
+import DateFilter, { DatePeriod } from '@/components/DateFilter';
 import { darkChartStyles, brandColors } from '@/lib/chartStyles';
+import { filterChurnRecords } from '@/lib/dateFilters';
+import { analyzeChurnData } from '@/lib/churnAnalytics';
 
 export default function Home() {
   const { data: session, status } = useSession();
+  const [rawChurnRecords, setRawChurnRecords] = useState<ChurnRecord[]>([]);
   const [data, setData] = useState<ChurnAnalysis | null>(null);
   const [summary, setSummary] = useState<any>(null);
   const [aiInsights, setAiInsights] = useState<string>('');
@@ -31,6 +35,22 @@ export default function Home() {
   const [aiLoading, setAiLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
+  const [selectedPeriod, setSelectedPeriod] = useState<DatePeriod>('all-time');
+
+  // Filter data based on selected period
+  const filteredData = useMemo(() => {
+    if (!data || !rawChurnRecords.length) return data;
+    
+    const filteredRecords = filterChurnRecords(rawChurnRecords, selectedPeriod);
+    const reanalyzedData = analyzeChurnData(filteredRecords);
+    
+    // Merge with AI insights and executive summary from original data
+    return {
+      ...reanalyzedData,
+      aiInsights: data.aiInsights,
+      executiveSummary: data.executiveSummary,
+    };
+  }, [data, rawChurnRecords, selectedPeriod]);
 
   useEffect(() => {
     // Fetch data FAST (without AI)
@@ -47,6 +67,13 @@ export default function Home() {
         }
 
         const churnData = await churnResponse.json();
+        
+        // Store raw records for filtering
+        const recordsResponse = await fetch('/api/churn-records');
+        if (recordsResponse.ok) {
+          const records = await recordsResponse.json();
+          setRawChurnRecords(records);
+        }
         
         // Merge reactivation data and calculate category-specific rates
         if (reactivationsResponse.ok) {
@@ -233,6 +260,9 @@ export default function Home() {
     );
   }
 
+  // Use filtered data if available, otherwise use original data
+  const displayData = filteredData || data;
+
   return (
     <>
       <Head>
@@ -277,11 +307,17 @@ export default function Home() {
             </div>
           </div>
 
+          {/* Date Filter */}
+          <DateFilter 
+            selectedPeriod={selectedPeriod} 
+            onPeriodChange={setSelectedPeriod}
+          />
+
           {/* Key Metrics - Focused on Boss Questions */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <MetricCard
               title="Total Churns"
-              value={summary?.totalChurns || data.totalChurns}
+              value={displayData.totalChurns}
               subtitle="Customers lost"
               icon={
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -291,7 +327,7 @@ export default function Home() {
             />
             <MetricCard
               title="Avg Customer Lifetime"
-              value={`${Math.round(data.averageMonthsBeforeChurn)} months`}
+              value={`${Math.round(displayData.averageMonthsBeforeChurn)} months`}
               subtitle="Before churning"
               icon={
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -301,7 +337,7 @@ export default function Home() {
             />
             <MetricCard
               title="Avg Reactivation Time"
-              value={summary ? `${summary.averageReactivationDays} days` : `${Math.round(data.averageReactivationDays)} days`}
+              value={`${Math.round(displayData.averageReactivationDays)} days`}
               subtitle="Churn to reactivation"
               icon={
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -311,8 +347,8 @@ export default function Home() {
             />
             <MetricCard
               title="Top Churn Reason"
-              value={(summary?.topChurnCategory || data.topChurnCategories[0]?.category || 'N/A').substring(0, 20)}
-              subtitle={`${summary?.topChurnCategoryCount || data.topChurnCategories[0]?.count || 0} churns`}
+              value={(displayData.topChurnCategories[0]?.category || 'N/A').substring(0, 20)}
+              subtitle={`${displayData.topChurnCategories[0]?.count || 0} churns`}
               icon={
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -325,8 +361,8 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             <MetricCard
               title="Top Competitor"
-              value={(summary?.topCompetitor || data.competitorAnalysis[0]?.competitor || 'N/A').substring(0, 30)}
-              subtitle={`$${(summary?.topCompetitorMRR || data.competitorAnalysis[0]?.totalMRR || 0).toFixed(0)} MRR lost`}
+              value={(displayData.competitorAnalysis[0]?.competitor || 'N/A').substring(0, 30)}
+              subtitle={`$${(displayData.competitorAnalysis[0]?.totalMRR || 0).toFixed(0)} MRR lost`}
               icon={
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -335,8 +371,8 @@ export default function Home() {
             />
             <MetricCard
               title="Total MRR Lost"
-              value={`$${Math.round(data.totalMRRLost).toLocaleString()}`}
-              subtitle={`Avg $${Math.round(data.averageMRRPerChurn)} per churn`}
+              value={`$${Math.round(displayData.totalMRRLost).toLocaleString()}`}
+              subtitle={`Avg $${Math.round(displayData.averageMRRPerChurn)} per churn`}
               icon={
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -352,7 +388,7 @@ export default function Home() {
               description="Why are customers leaving each month?"
             >
               <ResponsiveContainer width="100%" height={400}>
-                <BarChart data={data.monthlyChurnByCategory}>
+                <BarChart data={displayData.monthlyChurnByCategory}>
                   <CartesianGrid {...darkChartStyles.cartesianGrid} />
                   <XAxis 
                     dataKey="month" 
@@ -371,7 +407,7 @@ export default function Home() {
                     }}
                   />
                   <Legend {...darkChartStyles.legend} />
-                  {data.topChurnCategories.slice(0, 5).map((cat, index) => (
+                  {displayData.topChurnCategories.slice(0, 5).map((cat, index) => (
                     <Bar 
                       key={cat.category} 
                       dataKey={cat.category} 
@@ -380,7 +416,7 @@ export default function Home() {
                       name={cat.category.length > 25 ? cat.category.substring(0, 22) + '...' : cat.category}
                     />
                   ))}
-                  {data.monthlyChurnByCategory.some((m: any) => m.Other) && (
+                  {displayData.monthlyChurnByCategory.some((m: any) => m.Other) && (
                     <Bar dataKey="Other" stackId="churn" fill="#6b7280" name="Other" />
                   )}
                 </BarChart>
@@ -395,7 +431,7 @@ export default function Home() {
               description="Which churn reasons lead to customers coming back?"
             >
               <ResponsiveContainer width="100%" height={350}>
-                <BarChart data={data.reactivationByChurnCategory.slice(0, 6)}>
+                <BarChart data={displayData.reactivationByChurnCategory.slice(0, 6)}>
                   <CartesianGrid {...darkChartStyles.cartesianGrid} />
                   <XAxis dataKey="churnCategory" angle={-45} textAnchor="end" height={120} {...darkChartStyles.axis} />
                   <YAxis label={{ value: 'Reactivation Rate (%)', angle: -90, position: 'insideLeft', style: {fill: '#ffffff'} }} {...darkChartStyles.axis} />
@@ -413,7 +449,7 @@ export default function Home() {
           </div>
 
           {/* Boss Question 3: Competitors */}
-          {data.competitorAnalysis.length > 0 && (
+          {displayData.competitorAnalysis.length > 0 && (
             <div className="mb-8">
               <ChartCard
                 title="🏆 Competitors Winning - MRR & Pricing"
@@ -438,7 +474,7 @@ export default function Home() {
                       </tr>
                     </thead>
                     <tbody>
-                      {data.competitorAnalysis.slice(0, 8).map((competitor, index) => (
+                      {displayData.competitorAnalysis.slice(0, 8).map((competitor, index) => (
                         <tr key={index} className="border-b border-white/5 hover:bg-white/5 transition-colors">
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-white">
                             {competitor.competitor}
@@ -468,7 +504,7 @@ export default function Home() {
               description="When do customers leave and when do they come back?"
             >
               <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={data.monthlyTrend}>
+                <LineChart data={displayData.monthlyTrend}>
                   <CartesianGrid {...darkChartStyles.cartesianGrid} />
                   <XAxis dataKey="month" {...darkChartStyles.axis} />
                   <YAxis {...darkChartStyles.axis} />
