@@ -153,10 +153,35 @@ export function analyzeChurnData(records: ChurnRecord[]): Omit<ChurnAnalysis, 'a
     }))
     .sort((a, b) => b.count - a.count);
 
-  // Competitor analysis
+  // Competitor analysis - filter out non-competitor entries
   const competitorMap = new Map<string, { count: number; totalMRR: number; totalPrice: number }>();
+  
+  // Define non-competitor entries that should be excluded
+  const nonCompetitors = [
+    'self paid',
+    'self-paid', 
+    'self paid solution',
+    'internal',
+    'in-house',
+    'own solution',
+    'n/a',
+    'none',
+    'unknown',
+    'not applicable',
+    'no competitor',
+    'direct',
+    'direct payment'
+  ];
+  
   records.forEach(r => {
     if (r.competitor) {
+      const competitor = r.competitor.toLowerCase().trim();
+      
+      // Skip if it's a non-competitor entry
+      if (nonCompetitors.some(nc => competitor.includes(nc))) {
+        return;
+      }
+      
       const existing = competitorMap.get(r.competitor) || { count: 0, totalMRR: 0, totalPrice: 0 };
       competitorMap.set(r.competitor, {
         count: existing.count + 1,
@@ -165,6 +190,7 @@ export function analyzeChurnData(records: ChurnRecord[]): Omit<ChurnAnalysis, 'a
       });
     }
   });
+  
   const competitorAnalysis: CompetitorData[] = Array.from(competitorMap.entries())
     .map(([competitor, data]) => ({
       competitor,
