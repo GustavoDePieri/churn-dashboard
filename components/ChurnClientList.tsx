@@ -12,7 +12,7 @@ const ChurnClientList: React.FC<ChurnClientListProps> = ({ records, period }) =>
   const [searchTerm, setSearchTerm] = useState('');
   const [isExpanded, setIsExpanded] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  const itemsPerPage = 50;
 
   // Sort records
   const sortedRecords = [...records].sort((a, b) => {
