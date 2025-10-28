@@ -276,12 +276,17 @@ export default function Home() {
   // Helper function to get period label for client list
   const getPeriodLabel = (period: DatePeriod): string => {
     switch (period) {
+      case 'today': return 'today';
+      case 'yesterday': return 'yesterday';
+      case 'this-week': return 'this week';
+      case 'last-week': return 'last week';
       case 'this-month': return 'this month';
       case 'last-month': return 'last month';
-      case 'last-3-months': return 'in the last 3 months';
-      case 'last-6-months': return 'in the last 6 months';
+      case 'last-30-days': return 'in the last 30 days';
+      case 'last-90-days': return 'in the last 90 days';
+      case 'last-180-days': return 'in the last 180 days';
       case 'this-year': return 'this year';
-      case 'last-year': return 'last year';
+      case 'custom-range': return 'in custom range';
       case 'all-time': return 'all time';
       default: return period;
     }
