@@ -143,145 +143,144 @@ const ChurnClientList: React.FC<ChurnClientListProps> = ({ records, period }) =>
 
           {/* Summary Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-          <div className="bg-white/5 rounded-xl p-3 border border-white/10">
-            <div className="text-white/60 text-xs font-medium mb-1">Total Clients</div>
-            <div className="text-white text-xl font-bold">{filteredRecords.length}</div>
-          </div>
-          <div className="bg-white/5 rounded-xl p-3 border border-white/10">
-            <div className="text-white/60 text-xs font-medium mb-1">Total MRR Lost</div>
-            <div className="text-coral-main text-xl font-bold">
-              ${filteredRecords.reduce((sum, r) => sum + (r.mrr || 0), 0).toLocaleString()}
+            <div className="bg-white/5 rounded-xl p-3 border border-white/10">
+              <div className="text-white/60 text-xs font-medium mb-1">Total Clients</div>
+              <div className="text-white text-xl font-bold">{filteredRecords.length}</div>
+            </div>
+            <div className="bg-white/5 rounded-xl p-3 border border-white/10">
+              <div className="text-white/60 text-xs font-medium mb-1">Total MRR Lost</div>
+              <div className="text-coral-main text-xl font-bold">
+                ${filteredRecords.reduce((sum, r) => sum + (r.mrr || 0), 0).toLocaleString()}
+              </div>
+            </div>
+            <div className="bg-white/5 rounded-xl p-3 border border-white/10">
+              <div className="text-white/60 text-xs font-medium mb-1">Avg MRR per Client</div>
+              <div className="text-white text-xl font-bold">
+                ${Math.round(filteredRecords.reduce((sum, r) => sum + (r.mrr || 0), 0) / Math.max(filteredRecords.length, 1)).toLocaleString()}
+              </div>
+            </div>
+            <div className="bg-white/5 rounded-xl p-3 border border-white/10">
+              <div className="text-white/60 text-xs font-medium mb-1">Avg Customer Lifetime</div>
+              <div className="text-white text-xl font-bold">
+                {Math.round(filteredRecords.reduce((sum, r) => sum + (r.monthsBeforeChurn || 0), 0) / Math.max(filteredRecords.length, 1))} months
+              </div>
             </div>
           </div>
-          <div className="bg-white/5 rounded-xl p-3 border border-white/10">
-            <div className="text-white/60 text-xs font-medium mb-1">Avg MRR per Client</div>
-            <div className="text-white text-xl font-bold">
-              ${Math.round(filteredRecords.reduce((sum, r) => sum + (r.mrr || 0), 0) / Math.max(filteredRecords.length, 1)).toLocaleString()}
-            </div>
-          </div>
-          <div className="bg-white/5 rounded-xl p-3 border border-white/10">
-            <div className="text-white/60 text-xs font-medium mb-1">Avg Customer Lifetime</div>
-            <div className="text-white text-xl font-bold">
-              {Math.round(filteredRecords.reduce((sum, r) => sum + (r.monthsBeforeChurn || 0), 0) / Math.max(filteredRecords.length, 1))} months
-            </div>
-          </div>
-        </div>
-      </div>
 
-      {/* Table */}
-      <div className="overflow-x-auto">
-        <table className="min-w-full">
-          <thead>
-            <tr className="border-b border-white/10">
-              <th 
-                className="px-4 py-3 text-left text-xs font-bold text-white/80 uppercase tracking-wider cursor-pointer hover:text-purple-main transition-colors"
-                onClick={() => handleSort('clientName')}
-              >
-                <div className="flex items-center space-x-1">
-                  <span>Client Name</span>
-                  <SortIcon field="clientName" />
-                </div>
-              </th>
-              <th 
-                className="px-4 py-3 text-left text-xs font-bold text-white/80 uppercase tracking-wider cursor-pointer hover:text-purple-main transition-colors"
-                onClick={() => handleSort('churnDate')}
-              >
-                <div className="flex items-center space-x-1">
-                  <span>Churn Date</span>
-                  <SortIcon field="churnDate" />
-                </div>
-              </th>
-              <th 
-                className="px-4 py-3 text-left text-xs font-bold text-white/80 uppercase tracking-wider cursor-pointer hover:text-purple-main transition-colors"
-                onClick={() => handleSort('monthsBeforeChurn')}
-              >
-                <div className="flex items-center space-x-1">
-                  <span>Lifetime</span>
-                  <SortIcon field="monthsBeforeChurn" />
-                </div>
-              </th>
-              <th 
-                className="px-4 py-3 text-left text-xs font-bold text-white/80 uppercase tracking-wider cursor-pointer hover:text-purple-main transition-colors"
-                onClick={() => handleSort('churnCategory')}
-              >
-                <div className="flex items-center space-x-1">
-                  <span>Churn Reason</span>
-                  <SortIcon field="churnCategory" />
-                </div>
-              </th>
-              <th 
-                className="px-4 py-3 text-left text-xs font-bold text-white/80 uppercase tracking-wider cursor-pointer hover:text-purple-main transition-colors"
-                onClick={() => handleSort('competitor')}
-              >
-                <div className="flex items-center space-x-1">
-                  <span>Competitor</span>
-                  <SortIcon field="competitor" />
-                </div>
-              </th>
-              <th 
-                className="px-4 py-3 text-left text-xs font-bold text-white/80 uppercase tracking-wider cursor-pointer hover:text-purple-main transition-colors"
-                onClick={() => handleSort('mrr')}
-              >
-                <div className="flex items-center space-x-1">
-                  <span>MRR Lost</span>
-                  <SortIcon field="mrr" />
-                </div>
-              </th>
-              <th 
-                className="px-4 py-3 text-left text-xs font-bold text-white/80 uppercase tracking-wider cursor-pointer hover:text-purple-main transition-colors"
-                onClick={() => handleSort('serviceCategory')}
-              >
-                <div className="flex items-center space-x-1">
-                  <span>Service</span>
-                  <SortIcon field="serviceCategory" />
-                </div>
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-white/5">
-            {filteredRecords.length === 0 ? (
-              <tr>
-                <td colSpan={7} className="px-4 py-8 text-center text-white/40">
-                  No clients found matching your search
-                </td>
-              </tr>
-            ) : (
-              paginatedRecords.map((record) => (
-                <tr 
-                  key={record.id} 
-                  className="hover:bg-white/5 transition-colors group"
-                >
-                  <td className="px-4 py-3 whitespace-nowrap">
-                    <div className="text-sm font-semibold text-white group-hover:text-purple-main transition-colors">
-                      {record.clientName || 'Unknown'}
+          {/* Table */}
+          <div className="overflow-x-auto">
+            <table className="min-w-full">
+              <thead>
+                <tr className="border-b border-white/10">
+                  <th 
+                    className="px-4 py-3 text-left text-xs font-bold text-white/80 uppercase tracking-wider cursor-pointer hover:text-purple-main transition-colors"
+                    onClick={() => handleSort('clientName')}
+                  >
+                    <div className="flex items-center space-x-1">
+                      <span>Client Name</span>
+                      <SortIcon field="clientName" />
                     </div>
-                  </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm text-white/70">
-                    {formatDate(record.churnDate)}
-                  </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm text-white/70">
-                    {record.monthsBeforeChurn ? `${record.monthsBeforeChurn} months` : 'N/A'}
-                  </td>
-                  <td className="px-4 py-3 text-sm">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-coral-main/20 text-coral-main border border-coral-main/30">
-                      {record.churnCategory || 'Unknown'}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-sm text-white/70">
-                    {record.competitor || '-'}
-                  </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm font-semibold text-coral-main">
-                    {formatMRR(record.mrr)}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-white/60">
-                    {record.serviceCategory || '-'}
-                  </td>
+                  </th>
+                  <th 
+                    className="px-4 py-3 text-left text-xs font-bold text-white/80 uppercase tracking-wider cursor-pointer hover:text-purple-main transition-colors"
+                    onClick={() => handleSort('churnDate')}
+                  >
+                    <div className="flex items-center space-x-1">
+                      <span>Churn Date</span>
+                      <SortIcon field="churnDate" />
+                    </div>
+                  </th>
+                  <th 
+                    className="px-4 py-3 text-left text-xs font-bold text-white/80 uppercase tracking-wider cursor-pointer hover:text-purple-main transition-colors"
+                    onClick={() => handleSort('monthsBeforeChurn')}
+                  >
+                    <div className="flex items-center space-x-1">
+                      <span>Lifetime</span>
+                      <SortIcon field="monthsBeforeChurn" />
+                    </div>
+                  </th>
+                  <th 
+                    className="px-4 py-3 text-left text-xs font-bold text-white/80 uppercase tracking-wider cursor-pointer hover:text-purple-main transition-colors"
+                    onClick={() => handleSort('churnCategory')}
+                  >
+                    <div className="flex items-center space-x-1">
+                      <span>Churn Reason</span>
+                      <SortIcon field="churnCategory" />
+                    </div>
+                  </th>
+                  <th 
+                    className="px-4 py-3 text-left text-xs font-bold text-white/80 uppercase tracking-wider cursor-pointer hover:text-purple-main transition-colors"
+                    onClick={() => handleSort('competitor')}
+                  >
+                    <div className="flex items-center space-x-1">
+                      <span>Competitor</span>
+                      <SortIcon field="competitor" />
+                    </div>
+                  </th>
+                  <th 
+                    className="px-4 py-3 text-left text-xs font-bold text-white/80 uppercase tracking-wider cursor-pointer hover:text-purple-main transition-colors"
+                    onClick={() => handleSort('mrr')}
+                  >
+                    <div className="flex items-center space-x-1">
+                      <span>MRR Lost</span>
+                      <SortIcon field="mrr" />
+                    </div>
+                  </th>
+                  <th 
+                    className="px-4 py-3 text-left text-xs font-bold text-white/80 uppercase tracking-wider cursor-pointer hover:text-purple-main transition-colors"
+                    onClick={() => handleSort('serviceCategory')}
+                  >
+                    <div className="flex items-center space-x-1">
+                      <span>Service</span>
+                      <SortIcon field="serviceCategory" />
+                    </div>
+                  </th>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+              </thead>
+              <tbody className="divide-y divide-white/5">
+                {filteredRecords.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="px-4 py-8 text-center text-white/40">
+                      No clients found matching your search
+                    </td>
+                  </tr>
+                ) : (
+                  paginatedRecords.map((record) => (
+                    <tr 
+                      key={record.id} 
+                      className="hover:bg-white/5 transition-colors group"
+                    >
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <div className="text-sm font-semibold text-white group-hover:text-purple-main transition-colors">
+                          {record.clientName || 'Unknown'}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap text-sm text-white/70">
+                        {formatDate(record.churnDate)}
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap text-sm text-white/70">
+                        {record.monthsBeforeChurn ? `${record.monthsBeforeChurn} months` : 'N/A'}
+                      </td>
+                      <td className="px-4 py-3 text-sm">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-coral-main/20 text-coral-main border border-coral-main/30">
+                          {record.churnCategory || 'Unknown'}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-sm text-white/70">
+                        {record.competitor || '-'}
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap text-sm font-semibold text-coral-main">
+                        {formatMRR(record.mrr)}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-white/60">
+                        {record.serviceCategory || '-'}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
 
           {/* Pagination Controls */}
           {totalPages > 1 && (
