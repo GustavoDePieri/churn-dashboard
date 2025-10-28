@@ -12,7 +12,7 @@
 ## 🎯 Features
 
 ### 📈 **Analytics Dashboards**
-- **Main Dashboard** - Overview of churn metrics and trends
+- **Main Dashboard** - Overview of churn metrics and trends with detailed client list
 - **Reactivations Dashboard** - Track customer returns and recovery
 - **Monthly Report** - Comprehensive monthly analysis with date filtering
 
@@ -289,6 +289,12 @@ bcrypt your-password 10
 ## 📊 Dashboard Features
 
 ### Main Dashboard (`/`)
+- **Detailed Client List** with sortable columns and search
+  - View all churned clients for any date period
+  - Sort by name, date, MRR, reason, competitor, etc.
+  - Search across all client information
+  - Export to CSV with one click
+  - Summary statistics (total clients, MRR lost, avg metrics)
 - Total churns and average reactivation time
 - Top churn categories (stacked by month)
 - Monthly churn trends
@@ -410,6 +416,7 @@ For issues or questions:
 - Real-time data freshness
 - Mobile-responsive design
 - Monthly report with filtering
+- Detailed client list with sorting, search, and CSV export
 
 ### 🔜 Future Enhancements
 - Export reports to PDF
