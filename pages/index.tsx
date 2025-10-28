@@ -21,6 +21,7 @@ import AIInsightsEnhanced from '@/components/AIInsightsEnhanced';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import Header from '@/components/Header';
 import DateFilter, { DatePeriod } from '@/components/DateFilter';
+import ChurnClientList from '@/components/ChurnClientList';
 import { darkChartStyles, brandColors } from '@/lib/chartStyles';
 import { filterChurnRecords } from '@/lib/dateFilters';
 import { analyzeChurnData } from '@/lib/churnAnalytics';
@@ -37,11 +38,16 @@ export default function Home() {
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
   const [selectedPeriod, setSelectedPeriod] = useState<DatePeriod>('all-time');
 
+  // Filter records based on selected period
+  const filteredRecords = useMemo(() => {
+    if (!rawChurnRecords.length) return [];
+    return filterChurnRecords(rawChurnRecords, selectedPeriod);
+  }, [rawChurnRecords, selectedPeriod]);
+
   // Filter data based on selected period
   const filteredData = useMemo(() => {
     if (!data || !rawChurnRecords.length) return data;
     
-    const filteredRecords = filterChurnRecords(rawChurnRecords, selectedPeriod);
     const reanalyzedData = analyzeChurnData(filteredRecords);
     
     // Merge with AI insights, executive summary, and reactivation data from original data
@@ -54,7 +60,7 @@ export default function Home() {
       reactivationByChurnCategory: data.reactivationByChurnCategory, // Preserve original reactivation rates
       monthlyTrend: data.monthlyTrend, // Preserve original monthly trend with reactivations
     };
-  }, [data, rawChurnRecords, selectedPeriod, summary]);
+  }, [data, rawChurnRecords, selectedPeriod, summary, filteredRecords]);
 
   useEffect(() => {
     // Fetch data FAST (without AI)
@@ -267,6 +273,20 @@ export default function Home() {
   // Use filtered data if available, otherwise use original data
   const displayData = filteredData || data;
 
+  // Helper function to get period label for client list
+  const getPeriodLabel = (period: DatePeriod): string => {
+    switch (period) {
+      case 'this-month': return 'this month';
+      case 'last-month': return 'last month';
+      case 'last-3-months': return 'in the last 3 months';
+      case 'last-6-months': return 'in the last 6 months';
+      case 'this-year': return 'this year';
+      case 'last-year': return 'last year';
+      case 'all-time': return 'all time';
+      default: return period;
+    }
+  };
+
   return (
     <>
       <Head>
@@ -316,6 +336,14 @@ export default function Home() {
             selectedPeriod={selectedPeriod} 
             onPeriodChange={setSelectedPeriod}
           />
+
+          {/* Client List - Shows filtered clients */}
+          {filteredRecords.length > 0 && (
+            <ChurnClientList 
+              records={filteredRecords} 
+              period={getPeriodLabel(selectedPeriod)}
+            />
+          )}
 
           {/* Key Metrics - Focused on Boss Questions */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
