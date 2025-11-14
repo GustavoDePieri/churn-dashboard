@@ -115,12 +115,10 @@ export function calculateReactivationMetrics(
       ? Math.round(reactivationDays.reduce((sum, days) => sum + days, 0) / reactivationDays.length)
       : 0;
 
-  const reactivationRate = 
-    totalChurns > 0 
-      ? (validCalculations / totalChurns) * 100 
+  const reactivationRate =
+    totalChurns > 0
+      ? (validCalculations / totalChurns) * 100
       : 0;
-
-  });
 
   return {
     totalReactivations: reactivationRecords.length,
