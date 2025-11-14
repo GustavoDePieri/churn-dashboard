@@ -176,32 +176,13 @@ export function filterChurnRecords(
     return records; // Return all if no filter
   }
 
-  const filtered = records.filter((record) => {
-    if (!record.deactivationDate) {
-      console.log(`❌ FILTERED OUT (no deactivationDate): ${record.clientName}`);
-      return false;
-    }
+  return records.filter((record) => {
+    if (!record.deactivationDate) return false;
     const churnDate = parseDate(record.deactivationDate);
-    if (!churnDate) {
-      console.log(`❌ FILTERED OUT (invalid date): ${record.clientName} - "${record.deactivationDate}"`);
-      return false;
-    }
+    if (!churnDate) return false;
 
-    const isInRange = churnDate >= dateRange.start && churnDate <= dateRange.end;
-    if (!isInRange) {
-      // Only log a few examples to avoid spam
-      if (Math.random() < 0.01) { // Log ~1% of filtered records
-        console.log(`❌ FILTERED OUT (not in range): ${record.clientName} - "${record.deactivationDate}" (${churnDate.toISOString().split('T')[0]}) not in ${dateRange.start.toISOString().split('T')[0]} to ${dateRange.end.toISOString().split('T')[0]}`);
-      }
-    } else {
-      console.log(`✅ INCLUDED: ${record.clientName} - "${record.deactivationDate}" (${churnDate.toISOString().split('T')[0]})`);
-    }
-
-    return isInRange;
+    return churnDate >= dateRange.start && churnDate <= dateRange.end;
   });
-
-  console.log(`🔍 FILTER RESULT: ${filtered.length} of ${records.length} records match "${period}" filter`);
-  return filtered;
 }
 
 export function filterReactivationRecords(
