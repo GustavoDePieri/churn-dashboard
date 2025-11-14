@@ -117,7 +117,6 @@ export default async function handler(
       }
     });
 
-    console.log(`📊 Monthly Report: Indexed ${filteredChurns.length} churns for matching`);
 
     // Match reactivations with churns using the churnDate from REACTIVATIONS SHEET (Column J)
     filteredReactivations.forEach((reactivation, index) => {
@@ -163,7 +162,6 @@ export default async function handler(
       }
     });
 
-    console.log(`✅ Monthly Report: Matched ${matchedClients.length} clients with reactivations`);
 
     // Calculate cross-analysis metrics using the centralized calculator
     const reactivationMetrics = calculateReactivationMetrics(filteredReactivations, filteredChurns.length);

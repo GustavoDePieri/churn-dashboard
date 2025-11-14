@@ -120,13 +120,6 @@ export function calculateReactivationMetrics(
       ? (validCalculations / totalChurns) * 100 
       : 0;
 
-  // Log summary for debugging
-  console.log('📊 Reactivation Metrics Calculated:', {
-    totalReactivations: reactivationRecords.length,
-    validCalculations,
-    averageDays: averageDaysToReactivation,
-    rate: `${reactivationRate.toFixed(1)}%`,
-    parseErrors,
   });
 
   return {

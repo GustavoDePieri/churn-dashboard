@@ -211,10 +211,6 @@ export default function Home() {
               };
             }) || [];
           
-          console.log('📊 Category-specific reactivation rates calculated:');
-          churnData.reactivationByChurnCategory.forEach((item: any) => {
-            console.log(`  ${item.churnCategory}: ${item.reactivationRate}% (${item.totalCount} churns)`);
-          });
         }
         
         setData(churnData);

@@ -228,15 +228,6 @@ export function analyzeChurnData(records: ChurnRecord[]): Omit<ChurnAnalysis, 'a
           dateFrequencyMap.set(r.deactivationDate, dateCount + 1);
         }
 
-        // Log first few for debugging
-        if (idx < 5) {
-          console.log(`📅 Sample ${idx + 1}: "${r.deactivationDate}" → ${month} | Client: ${r.clientName}`);
-        }
-
-        // Special logging for Dec 2024 to debug the 545 issue
-        if (month === '2024-12' && existing < 5) {
-          console.log(`  ⭐ Dec 2024 #${existing + 1}: "${r.deactivationDate}" | ${r.clientName}`);
-        }
       } catch (error) {
         // Skip invalid dates
         parseErrors++;
@@ -246,16 +237,7 @@ export function analyzeChurnData(records: ChurnRecord[]): Omit<ChurnAnalysis, 'a
       }
     }
   });
-  
-  console.log(`📊 Monthly churn parsing: ${parsedCount} success, ${parseErrors} errors, ${monthlyMap.size} unique months`);
-  console.log(`📊 Total records processed: ${records.length}`);
-  
-  // Log top 5 months by count for debugging
-  const topMonths = Array.from(monthlyMap.entries())
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 5);
-  console.log('📊 Top 5 months by churn count:', topMonths);
-  
+
   // Calculate percentage for Dec 2024
   const dec2024Count = monthlyMap.get('2024-12') || 0;
   const dec2024Percentage = ((dec2024Count / records.length) * 100).toFixed(1);
