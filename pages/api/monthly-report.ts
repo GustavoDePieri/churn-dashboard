@@ -64,9 +64,9 @@ export default async function handler(
       const end = parseISO(endDate as string);
 
       filteredChurns = churnRecords.filter(record => {
-        if (!record.deactivationDate) return false;
+        if (!record.estimatedChurnDate) return false;
         try {
-          const churnDate = parseISO(record.deactivationDate);
+          const churnDate = parseISO(record.estimatedChurnDate);
           return isWithinInterval(churnDate, { start, end });
         } catch {
           return false;

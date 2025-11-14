@@ -7,7 +7,7 @@ interface ChurnClientListProps {
 }
 
 const ChurnClientList: React.FC<ChurnClientListProps> = ({ records, period }) => {
-  const [sortField, setSortField] = useState<keyof ChurnRecord>('deactivationDate');
+  const [sortField, setSortField] = useState<keyof ChurnRecord>('estimatedChurnDate');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [searchTerm, setSearchTerm] = useState('');
   const [isExpanded, setIsExpanded] = useState(false);
@@ -219,11 +219,11 @@ const ChurnClientList: React.FC<ChurnClientListProps> = ({ records, period }) =>
                   </th>
                   <th
                     className="px-4 py-3 text-left text-xs font-bold text-white/80 uppercase tracking-wider cursor-pointer hover:text-purple-main transition-colors"
-                    onClick={() => handleSort('deactivationDate')}
+                    onClick={() => handleSort('estimatedChurnDate')}
                   >
                     <div className="flex items-center space-x-1">
-                      <span>Deactivation Date</span>
-                      <SortIcon field="deactivationDate" />
+                      <span>Estimated Churn Date</span>
+                      <SortIcon field="estimatedChurnDate" />
                     </div>
                   </th>
                 </tr>
@@ -261,7 +261,7 @@ const ChurnClientList: React.FC<ChurnClientListProps> = ({ records, period }) =>
                         {formatMRR(record.lastInvoiceMRR)}
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap text-sm text-white/70">
-                        {formatDate(record.deactivationDate || '')}
+                        {formatDate(record.estimatedChurnDate || '')}
                       </td>
                     </tr>
                   ))
@@ -336,7 +336,7 @@ const ChurnClientList: React.FC<ChurnClientListProps> = ({ records, period }) =>
             <button
               onClick={() => {
                 // Export to CSV
-                const headers = ['Account Name', 'CS Group', 'Churn Category', 'Competitor', 'Last Invoice MRR', 'Deactivation Date'];
+                const headers = ['Account Name', 'CS Group', 'Churn Category', 'Competitor', 'Last Invoice MRR', 'Estimated Churn Date'];
                 const csvContent = [
                   headers.join(','),
                   ...filteredRecords.map(r => [
@@ -345,7 +345,7 @@ const ChurnClientList: React.FC<ChurnClientListProps> = ({ records, period }) =>
                     `"${r.churnCategory || ''}"`,
                     `"${r.competitor || ''}"`,
                     r.lastInvoiceMRR || '',
-                    r.deactivationDate || ''
+                    r.estimatedChurnDate || ''
                   ].join(','))
                 ].join('\n');
                 

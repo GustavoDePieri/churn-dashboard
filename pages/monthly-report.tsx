@@ -513,7 +513,7 @@ export default function MonthlyReport() {
                       {crossAnalysis.matchedClients.map((client: any, index: number) => (
                         <tr key={index} className="border-b border-white/5 hover:bg-white/5 transition-colors">
                           <td className="px-4 py-3 text-sm text-white font-medium">{client.clientName}</td>
-                          <td className="px-4 py-3 text-sm text-coral-main">{format(new Date(client.deactivationDate), 'MMM dd, yyyy')}</td>
+                          <td className="px-4 py-3 text-sm text-coral-main">{format(new Date(client.estimatedChurnDate), 'MMM dd, yyyy')}</td>
                           <td className="px-4 py-3 text-sm text-green-400">{format(new Date(client.reactivationDate), 'MMM dd, yyyy')}</td>
                           <td className="px-4 py-3 text-sm text-purple-main font-bold">{client.daysToReactivate}</td>
                           <td className="px-4 py-3 text-sm text-white/70 max-w-xs truncate">{client.churnCategory}</td>
