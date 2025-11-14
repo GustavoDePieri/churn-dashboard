@@ -177,8 +177,8 @@ export function filterChurnRecords(
   }
 
   return records.filter((record) => {
-    if (!record.estimatedChurnDate) return false;
-    const churnDate = parseDate(record.estimatedChurnDate);
+    if (!record.deactivationDate) return false;
+    const churnDate = parseDate(record.deactivationDate);
     if (!churnDate) return false;
 
     return churnDate >= dateRange.start && churnDate <= dateRange.end;

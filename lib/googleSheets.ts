@@ -52,7 +52,7 @@ export async function getGoogleSheetsData(): Promise<ChurnRecord[]> {
     // I=Churn Explanation ST, J=Primary Churn Category, K=Warning Reason,
     // L=Account ID, M=Avg MRR, N=Avg TPV, O=Last Effective Payment Date,
     // P=Estimated Churn Date, Q=Deactivation Date, R=Competitor Name, S=Created Date
-    // NOTE: Using Estimated Churn Date (P) for comprehensive churn tracking (past and future)
+    // NOTE: Using Deactivation Date (Q) for churn tracking accuracy
     const records: ChurnRecord[] = rows.slice(1).map((row, index) => {
       const estimatedChurnDate = row[15] || ''; // Column P - Estimated Churn Date
       const deactivationDate = row[16] || ''; // Column Q - Deactivation Date
@@ -76,12 +76,15 @@ export async function getGoogleSheetsData(): Promise<ChurnRecord[]> {
       const mrrValue = row[4] || row[12]; // Column E (Last Invoice MRR) or M (Avg MRR)
       const tpvValue = row[5] || row[13]; // Column F (TPV Last Month) or N (Avg TPV)
 
-      // Calculate months before churn using estimated churn date
+      // Use deactivationDate if available, otherwise fall back to estimatedChurnDate
+      const primaryChurnDate = deactivationDate || estimatedChurnDate;
+
+      // Calculate months before churn
       let monthsBeforeChurn: number | undefined = undefined;
-      if (createdDate && estimatedChurnDate) {
+      if (createdDate && primaryChurnDate) {
         try {
           const created = new Date(createdDate);
-          const churned = new Date(estimatedChurnDate);
+          const churned = new Date(primaryChurnDate);
           if (!isNaN(created.getTime()) && !isNaN(churned.getTime())) {
             const diffTime = Math.abs(churned.getTime() - created.getTime());
             const diffMonths = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 30.44)); // Average days per month
@@ -109,7 +112,8 @@ export async function getGoogleSheetsData(): Promise<ChurnRecord[]> {
         avgMRR: parseMoney(row[12], clientName), // Column M - Avg MRR
         avgTPV: parseMoney(row[13], clientName), // Column N - Avg TPV
         lastEffectivePaymentDate: row[14] || undefined, // Column O - Last Effective Payment Date
-        estimatedChurnDate: estimatedChurnDate || undefined, // Column P - Estimated Churn Date (PRIMARY - includes past and future churns)
+        estimatedChurnDate: estimatedChurnDate || undefined, // Column P - Estimated Churn Date (kept for reference)
+        deactivationDate: primaryChurnDate, // Column Q - Deactivation Date (primary churn date, falls back to estimated if empty)
         competitor: row[17] || undefined, // Column R - Competitor Name
         createdDate: createdDate, // Column S - Created Date
         monthsBeforeChurn: monthsBeforeChurn, // Calculated months from creation to churn

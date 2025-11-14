@@ -15,7 +15,8 @@ export interface ChurnRecord {
   avgMRR?: number; // NEW: Avg MRR
   avgTPV?: number; // NEW: Avg TPV
   lastEffectivePaymentDate?: string; // NEW: Last Effective Payment Date
-  estimatedChurnDate?: string; // PRIMARY: Estimated Churn Date (includes past and future churns)
+  estimatedChurnDate?: string; // NEW: Estimated Churn Date (kept for reference)
+  deactivationDate?: string; // NEW: Deactivation Date (PRIMARY churn tracking date for accuracy)
   competitor?: string;
   createdDate?: string; // Account creation date
   monthsBeforeChurn?: number; // Months from creation to churn
