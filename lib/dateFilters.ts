@@ -171,11 +171,11 @@ export function filterChurnRecords(
   period: DatePeriod
 ): ChurnRecord[] {
   const dateRange = getDateRange(period);
-  
+
   if (!dateRange) {
     return records; // Return all if no filter
   }
-  
+
   return records.filter((record) => {
     if (!record.deactivationDate) return false;
     const churnDate = parseDate(record.deactivationDate);
