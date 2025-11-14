@@ -49,7 +49,7 @@ export function getDateRange(period: DatePeriod): { start: Date; end: Date } | n
       
     case 'this-month': {
       const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-      const monthEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+      const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999); // Last day of current month
       return {
         start: monthStart,
         end: monthEnd,
@@ -176,13 +176,32 @@ export function filterChurnRecords(
     return records; // Return all if no filter
   }
 
-  return records.filter((record) => {
-    if (!record.deactivationDate) return false;
+  const filtered = records.filter((record) => {
+    if (!record.deactivationDate) {
+      console.log(`❌ FILTERED OUT (no deactivationDate): ${record.clientName}`);
+      return false;
+    }
     const churnDate = parseDate(record.deactivationDate);
-    if (!churnDate) return false;
+    if (!churnDate) {
+      console.log(`❌ FILTERED OUT (invalid date): ${record.clientName} - "${record.deactivationDate}"`);
+      return false;
+    }
 
-    return churnDate >= dateRange.start && churnDate <= dateRange.end;
+    const isInRange = churnDate >= dateRange.start && churnDate <= dateRange.end;
+    if (!isInRange) {
+      // Only log a few examples to avoid spam
+      if (Math.random() < 0.01) { // Log ~1% of filtered records
+        console.log(`❌ FILTERED OUT (not in range): ${record.clientName} - "${record.deactivationDate}" (${churnDate.toISOString().split('T')[0]}) not in ${dateRange.start.toISOString().split('T')[0]} to ${dateRange.end.toISOString().split('T')[0]}`);
+      }
+    } else {
+      console.log(`✅ INCLUDED: ${record.clientName} - "${record.deactivationDate}" (${churnDate.toISOString().split('T')[0]})`);
+    }
+
+    return isInRange;
   });
+
+  console.log(`🔍 FILTER RESULT: ${filtered.length} of ${records.length} records match "${period}" filter`);
+  return filtered;
 }
 
 export function filterReactivationRecords(
