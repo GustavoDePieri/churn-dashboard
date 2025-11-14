@@ -1,5 +1,6 @@
 import { ChurnRecord, ReactivationRecord } from '@/types';
 import { DatePeriod } from '@/components/DateFilter';
+import { parseISO, parse } from 'date-fns';
 
 export function getDateRange(period: DatePeriod): { start: Date; end: Date } | null {
   const now = new Date();
@@ -46,11 +47,14 @@ export function getDateRange(period: DatePeriod): { start: Date; end: Date } | n
       };
     }
       
-    case 'this-month':
+    case 'this-month': {
+      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+      const monthEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
       return {
-        start: new Date(now.getFullYear(), now.getMonth(), 1),
-        end: now,
+        start: monthStart,
+        end: monthEnd,
       };
+    }
       
     case 'last-month': {
       const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
@@ -107,10 +111,56 @@ export function parseDate(dateString: string): Date | null {
   if (!dateString) return null;
   
   try {
-    // Handle various date formats
+    // Try ISO format first (YYYY-MM-DD)
+    try {
+      const isoDate = parseISO(dateString);
+      if (!isNaN(isoDate.getTime())) {
+        return isoDate;
+      }
+    } catch (e) {
+      // Continue to other formats
+    }
+    
+    // Try M/D/YYYY or MM/DD/YYYY format (US format)
+    if (dateString.includes('/')) {
+      const parts = dateString.split('/');
+      if (parts.length === 3) {
+        const [month, day, year] = parts;
+        // Construct ISO format: YYYY-MM-DD
+        const paddedMonth = month.padStart(2, '0');
+        const paddedDay = day.padStart(2, '0');
+        const isoFormat = `${year}-${paddedMonth}-${paddedDay}`;
+        
+        try {
+          const parsedDate = parseISO(isoFormat);
+          if (!isNaN(parsedDate.getTime())) {
+            return parsedDate;
+          }
+        } catch (e) {
+          // Continue
+        }
+      }
+    }
+    
+    // Try D-M-YYYY or DD-MM-YYYY format (with dashes)
+    if (dateString.includes('-') && !dateString.match(/^\d{4}-/)) {
+      try {
+        const parsedDate = parse(dateString, 'd-M-yyyy', new Date());
+        if (!isNaN(parsedDate.getTime())) {
+          return parsedDate;
+        }
+      } catch (e) {
+        // Continue
+      }
+    }
+    
+    // Fallback to native Date parsing
     const date = new Date(dateString);
-    if (isNaN(date.getTime())) return null;
-    return date;
+    if (!isNaN(date.getTime())) {
+      return date;
+    }
+    
+    return null;
   } catch {
     return null;
   }
