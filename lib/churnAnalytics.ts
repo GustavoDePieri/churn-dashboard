@@ -214,34 +214,34 @@ export function analyzeChurnData(records: ChurnRecord[]): Omit<ChurnAnalysis, 'a
   let parsedCount = 0;
   
   records.forEach((r, idx) => {
-    if (r.churnDate) {
+    if (r.deactivationDate) {
       try {
-        const parsedDate = parseFlexibleDate(r.churnDate);
+        const parsedDate = parseFlexibleDate(r.deactivationDate);
         const month = format(startOfMonth(parsedDate), 'yyyy-MM');
         const existing = monthlyMap.get(month) || 0;
         monthlyMap.set(month, existing + 1);
         parsedCount++;
-        
+
         // Track exact date frequency for Dec 2024
         if (month === '2024-12') {
-          const dateCount = dateFrequencyMap.get(r.churnDate) || 0;
-          dateFrequencyMap.set(r.churnDate, dateCount + 1);
+          const dateCount = dateFrequencyMap.get(r.deactivationDate) || 0;
+          dateFrequencyMap.set(r.deactivationDate, dateCount + 1);
         }
-        
+
         // Log first few for debugging
         if (idx < 5) {
-          console.log(`📅 Sample ${idx + 1}: "${r.churnDate}" → ${month} | Client: ${r.clientName}`);
+          console.log(`📅 Sample ${idx + 1}: "${r.deactivationDate}" → ${month} | Client: ${r.clientName}`);
         }
-        
+
         // Special logging for Dec 2024 to debug the 545 issue
         if (month === '2024-12' && existing < 5) {
-          console.log(`  ⭐ Dec 2024 #${existing + 1}: "${r.churnDate}" | ${r.clientName}`);
+          console.log(`  ⭐ Dec 2024 #${existing + 1}: "${r.deactivationDate}" | ${r.clientName}`);
         }
       } catch (error) {
         // Skip invalid dates
         parseErrors++;
         if (parseErrors <= 3) {
-          console.warn(`❌ Failed to parse churn date: "${r.churnDate}" - ${error}`);
+          console.warn(`❌ Failed to parse churn date: "${r.deactivationDate}" - ${error}`);
         }
       }
     }
@@ -283,9 +283,9 @@ export function analyzeChurnData(records: ChurnRecord[]): Omit<ChurnAnalysis, 'a
   // Monthly churn by category (for stacked bar chart)
   const monthlyCategoryMap = new Map<string, Map<string, number>>();
   records.forEach(r => {
-    if (r.churnDate) {
+    if (r.deactivationDate) {
       try {
-        const month = format(startOfMonth(parseFlexibleDate(r.churnDate)), 'yyyy-MM');
+        const month = format(startOfMonth(parseFlexibleDate(r.deactivationDate)), 'yyyy-MM');
         if (!monthlyCategoryMap.has(month)) {
           monthlyCategoryMap.set(month, new Map());
         }
@@ -294,7 +294,7 @@ export function analyzeChurnData(records: ChurnRecord[]): Omit<ChurnAnalysis, 'a
         categoryMap.set(r.churnCategory, count + 1);
       } catch (error) {
         // Skip invalid dates
-        console.warn(`Failed to parse churn date for monthly category: ${r.churnDate}`);
+        console.warn(`Failed to parse churn date for monthly category: ${r.deactivationDate}`);
       }
     }
   });

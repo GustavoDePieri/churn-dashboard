@@ -172,43 +172,34 @@ const ChurnClientList: React.FC<ChurnClientListProps> = ({ records, period }) =>
             <table className="min-w-full">
               <thead>
                 <tr className="border-b border-white/10">
-                  <th 
+                  <th
                     className="px-4 py-3 text-left text-xs font-bold text-white/80 uppercase tracking-wider cursor-pointer hover:text-purple-main transition-colors"
                     onClick={() => handleSort('clientName')}
                   >
                     <div className="flex items-center space-x-1">
-                      <span>Client Name</span>
+                      <span>Account Name</span>
                       <SortIcon field="clientName" />
                     </div>
                   </th>
-                  <th 
+                  <th
                     className="px-4 py-3 text-left text-xs font-bold text-white/80 uppercase tracking-wider cursor-pointer hover:text-purple-main transition-colors"
-                    onClick={() => handleSort('churnDate')}
+                    onClick={() => handleSort('csGroup')}
                   >
                     <div className="flex items-center space-x-1">
-                      <span>Churn Date</span>
-                      <SortIcon field="churnDate" />
+                      <span>CS Group</span>
+                      <SortIcon field="csGroup" />
                     </div>
                   </th>
-                  <th 
-                    className="px-4 py-3 text-left text-xs font-bold text-white/80 uppercase tracking-wider cursor-pointer hover:text-purple-main transition-colors"
-                    onClick={() => handleSort('monthsBeforeChurn')}
-                  >
-                    <div className="flex items-center space-x-1">
-                      <span>Lifetime</span>
-                      <SortIcon field="monthsBeforeChurn" />
-                    </div>
-                  </th>
-                  <th 
+                  <th
                     className="px-4 py-3 text-left text-xs font-bold text-white/80 uppercase tracking-wider cursor-pointer hover:text-purple-main transition-colors"
                     onClick={() => handleSort('churnCategory')}
                   >
                     <div className="flex items-center space-x-1">
-                      <span>Churn Reason</span>
+                      <span>Churn Category</span>
                       <SortIcon field="churnCategory" />
                     </div>
                   </th>
-                  <th 
+                  <th
                     className="px-4 py-3 text-left text-xs font-bold text-white/80 uppercase tracking-wider cursor-pointer hover:text-purple-main transition-colors"
                     onClick={() => handleSort('competitor')}
                   >
@@ -217,22 +208,22 @@ const ChurnClientList: React.FC<ChurnClientListProps> = ({ records, period }) =>
                       <SortIcon field="competitor" />
                     </div>
                   </th>
-                  <th 
+                  <th
                     className="px-4 py-3 text-left text-xs font-bold text-white/80 uppercase tracking-wider cursor-pointer hover:text-purple-main transition-colors"
-                    onClick={() => handleSort('mrr')}
+                    onClick={() => handleSort('lastInvoiceMRR')}
                   >
                     <div className="flex items-center space-x-1">
-                      <span>MRR Lost</span>
-                      <SortIcon field="mrr" />
+                      <span>Last Invoice MRR</span>
+                      <SortIcon field="lastInvoiceMRR" />
                     </div>
                   </th>
-                  <th 
+                  <th
                     className="px-4 py-3 text-left text-xs font-bold text-white/80 uppercase tracking-wider cursor-pointer hover:text-purple-main transition-colors"
-                    onClick={() => handleSort('serviceCategory')}
+                    onClick={() => handleSort('deactivationDate')}
                   >
                     <div className="flex items-center space-x-1">
-                      <span>Service</span>
-                      <SortIcon field="serviceCategory" />
+                      <span>Deactivation Date</span>
+                      <SortIcon field="deactivationDate" />
                     </div>
                   </th>
                 </tr>
@@ -240,14 +231,14 @@ const ChurnClientList: React.FC<ChurnClientListProps> = ({ records, period }) =>
               <tbody className="divide-y divide-white/5">
                 {filteredRecords.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="px-4 py-8 text-center text-white/40">
+                    <td colSpan={6} className="px-4 py-8 text-center text-white/40">
                       No clients found matching your search
                     </td>
                   </tr>
                 ) : (
                   paginatedRecords.map((record) => (
-                    <tr 
-                      key={record.id} 
+                    <tr
+                      key={record.id}
                       className="hover:bg-white/5 transition-colors group"
                     >
                       <td className="px-4 py-3 whitespace-nowrap">
@@ -256,10 +247,7 @@ const ChurnClientList: React.FC<ChurnClientListProps> = ({ records, period }) =>
                         </div>
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap text-sm text-white/70">
-                        {formatDate(record.churnDate)}
-                      </td>
-                      <td className="px-4 py-3 whitespace-nowrap text-sm text-white/70">
-                        {record.monthsBeforeChurn ? `${record.monthsBeforeChurn} months` : 'N/A'}
+                        {record.csGroup || '-'}
                       </td>
                       <td className="px-4 py-3 text-sm">
                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-coral-main/20 text-coral-main border border-coral-main/30">
@@ -270,10 +258,10 @@ const ChurnClientList: React.FC<ChurnClientListProps> = ({ records, period }) =>
                         {record.competitor || '-'}
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap text-sm font-semibold text-coral-main">
-                        {formatMRR(record.mrr)}
+                        {formatMRR(record.lastInvoiceMRR)}
                       </td>
-                      <td className="px-4 py-3 text-sm text-white/60">
-                        {record.serviceCategory || '-'}
+                      <td className="px-4 py-3 whitespace-nowrap text-sm text-white/70">
+                        {formatDate(record.deactivationDate)}
                       </td>
                     </tr>
                   ))
@@ -348,17 +336,16 @@ const ChurnClientList: React.FC<ChurnClientListProps> = ({ records, period }) =>
             <button
               onClick={() => {
                 // Export to CSV
-                const headers = ['Client Name', 'Churn Date', 'Lifetime (months)', 'Churn Reason', 'Competitor', 'MRR Lost', 'Service'];
+                const headers = ['Account Name', 'CS Group', 'Churn Category', 'Competitor', 'Last Invoice MRR', 'Deactivation Date'];
                 const csvContent = [
                   headers.join(','),
                   ...filteredRecords.map(r => [
                     `"${r.clientName || ''}"`,
-                    r.churnDate || '',
-                    r.monthsBeforeChurn || '',
+                    `"${r.csGroup || ''}"`,
                     `"${r.churnCategory || ''}"`,
                     `"${r.competitor || ''}"`,
-                    r.mrr || '',
-                    `"${r.serviceCategory || ''}"`
+                    r.lastInvoiceMRR || '',
+                    r.deactivationDate || ''
                   ].join(','))
                 ].join('\n');
                 

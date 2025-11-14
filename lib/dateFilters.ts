@@ -127,9 +127,9 @@ export function filterChurnRecords(
   }
   
   return records.filter((record) => {
-    const churnDate = parseDate(record.churnDate);
+    const churnDate = parseDate(record.deactivationDate);
     if (!churnDate) return false;
-    
+
     return churnDate >= dateRange.start && churnDate <= dateRange.end;
   });
 }

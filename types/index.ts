@@ -1,11 +1,25 @@
 export interface ChurnRecord {
   id: string;
   clientName: string;
-  churnDate: string;
-  createdDate?: string; // NEW: Account creation date
-  monthsBeforeChurn?: number; // NEW: Months from creation to churn
+  csGroup?: string; // NEW: CS Group
+  platformClientId?: string; // NEW: Platform Client ID
+  csSubGroup?: string; // NEW: Cs Sub-Group
+  lastInvoiceMRR?: number; // NEW: Last Invoice MRR
+  tpvLastMonth?: number; // NEW: TPV Last Month
+  warningMetrics?: string; // NEW: Warning Metrics
+  warningExplanation?: string; // NEW: Warning Explanation
+  churnExplanationST?: string; // NEW: Churn Explanation ST
   churnCategory: string;
+  warningReason?: string; // NEW: Warning Reason
+  accountId?: string; // NEW: Account ID
+  avgMRR?: number; // NEW: Avg MRR
+  avgTPV?: number; // NEW: Avg TPV
+  lastEffectivePaymentDate?: string; // NEW: Last Effective Payment Date
+  estimatedChurnDate?: string; // NEW: Estimated Churn Date (kept for reference)
+  deactivationDate?: string; // NEW: Deactivation Date (PRIMARY churn tracking date for accuracy)
   competitor?: string;
+  createdDate?: string; // Account creation date
+  monthsBeforeChurn?: number; // Months from creation to churn
   mrr?: number;
   price?: number;
   serviceCategory?: string;
