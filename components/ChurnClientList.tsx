@@ -7,7 +7,7 @@ interface ChurnClientListProps {
 }
 
 const ChurnClientList: React.FC<ChurnClientListProps> = ({ records, period }) => {
-  const [sortField, setSortField] = useState<keyof ChurnRecord>('churnDate');
+  const [sortField, setSortField] = useState<keyof ChurnRecord>('deactivationDate');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [searchTerm, setSearchTerm] = useState('');
   const [isExpanded, setIsExpanded] = useState(false);
@@ -261,7 +261,7 @@ const ChurnClientList: React.FC<ChurnClientListProps> = ({ records, period }) =>
                         {formatMRR(record.lastInvoiceMRR)}
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap text-sm text-white/70">
-                        {formatDate(record.deactivationDate)}
+                        {formatDate(record.deactivationDate || '')}
                       </td>
                     </tr>
                   ))
